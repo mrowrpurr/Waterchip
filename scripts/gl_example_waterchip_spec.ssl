@@ -1,0 +1,59 @@
+#define DEBUG_NAME "ExampleSpec"
+#include "FormattedDebug.h"
+#include "sfall/sfall.h"
+#include "sfall/lib.arrays.h"
+/////////////////////////////
+
+#include "Waterchip.h"
+
+variable test_initialization_complete = false;
+
+variable test_suite_data;
+
+variable currently_running_test_name = "";
+
+variable test_suite_name = "describe name here";
+
+procedure start;
+
+procedure start begin
+    debug("------------- start begin --------------");
+    debug1f("========[ %s ]=======", currently_running_test_name);
+    /////////////////////
+
+    // Register a test
+    if not test_initialization_complete then begin
+        if not waterchip_data then waterchip_data = __waterchip_data;
+        debug2("REGISTER test", test_suite_name, "this test");
+        if not test_suite_data then begin
+            test_suite_data = {};
+            fix_array(test_suite_data);
+            waterchip_data[test_suite_name] = test_suite_data;
+            test_suite_data.test_names = [];
+            fix_array(test_suite_data.test_names);
+            test_suite_data.test_results = {};
+            fix_array(test_suite_data.test_results);
+        end
+        call array_push(test_suite_data.test_names, "this test");
+
+    end else if currently_running_test_name == "this test" then begin
+        debug2("RUN test", test_suite_name, "this test");
+    end
+
+    /////////////////////
+    debug1("running all tests in suite", test_suite_name);
+    if not test_initialization_complete then begin
+        test_initialization_complete = true;
+
+        variable test_name;
+        foreach test_name in (test_suite_data.test_names) begin
+            debug2("run test from loop", test_suite_name, test_name);
+            currently_running_test_name = test_name;
+            call start;
+        end
+    end
+
+    /////////////////////
+    debug("------------- start end --------------");
+    debug1f("========[ %s ]=======", currently_running_test_name);
+end

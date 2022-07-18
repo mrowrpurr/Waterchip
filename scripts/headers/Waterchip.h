@@ -2,8 +2,13 @@
     Library for Waterchip test/spec framework ~ by Mrowr Purr ~
 */
 
+#include "sfall/sfall.h"
+#include "sfall/lib.arrays.h"
+
 // Imported variable for Waterchip test runner.
 import variable __waterchip_data;
+
+procedure start;
 
 // Local variable for accessing ___waterchip_data using Map accessors.
 // Workaround for SSLC bug: Map accessors don't work on import/export variables.
@@ -48,3 +53,32 @@ variable __waterchip__testsuite_times_run_tests_backup_test_var_to_verify_single
 // Simply runs the provided block if any test is running. Merely semantics.
 // MUST be placed AFTER all
 #define teardown if __waterchip_testsuite_currently_running_test_name then
+
+// Register a test
+#define test(test_name) \
+    if not waterchip_data then waterchip_data = __waterchip_data; \
+    if not __waterchip_testsuite_data then begin \
+        __waterchip_testsuite_data = {}; \
+        fix_array(__waterchip_testsuite_data); \
+        waterchip_data[__waterchip__testsuite_name] = __waterchip_testsuite_data; \
+        __waterchip_testsuite_data.test_names = []; \
+        fix_array(__waterchip_testsuite_data.test_names); \
+        __waterchip_testsuite_data.test_results = {}; \
+        fix_array(__waterchip_testsuite_data.test_results); \
+    end \
+    if (not __waterchip_testsuite_currently_running_tests) and scan_array(__waterchip_testsuite_data.test_names, test_name) > -1 and __waterchip__testsuite_times_run_tests_backup_test_var_to_verify_single_run == 0 then begin \
+        set_global_script_repeat(0); \
+        __waterchip__testsuite_times_run_tests_backup_test_var_to_verify_single_run++; \
+        __waterchip_testsuite_currently_running_tests = true; \
+        foreach __waterchip_testsuite_currently_running_test_name in (__waterchip_testsuite_data.test_names) begin \
+            call start; \
+        end \
+        return; \
+    end \
+    if not __waterchip_testsuite_repeat_initialized then begin \
+        __waterchip_testsuite_repeat_initialized = true; \
+        set_global_script_repeat(1); \
+    end \
+    if scan_array(__waterchip_testsuite_data.test_names, test_name) == -1 then begin \
+        call array_push(__waterchip_testsuite_data.test_names, test_name); \
+    end else if __waterchip_testsuite_currently_running_tests and __waterchip_testsuite_currently_running_test_name == test_name then

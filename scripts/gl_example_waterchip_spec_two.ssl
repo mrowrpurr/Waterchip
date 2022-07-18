@@ -4,22 +4,22 @@
 
 #include "Waterchip.h"
 
-describe("some test suite") begin
+describe("TWO ") begin
 
     setup begin
-        debug("SETUP");
+        debug("SETUP 2");
     end
 
-    test("this test") begin
+    test("this test 2") begin
         debug("this test");
     end
 
-    test("another test") begin
+    test("another test 2") begin
         debug("another test");
     end
 
     teardown begin
-        debug("TEARDOWN");
+        debug("TEARDOWN 2");
     end
     
 end

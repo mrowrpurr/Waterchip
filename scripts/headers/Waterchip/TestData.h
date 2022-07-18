@@ -6,6 +6,7 @@ export variable __waterchip_data;
 variable waterchip_data;
 
 inline procedure TestData_Initialize begin
+
     // Setup map for all test data (persist in game session)
     __waterchip_data = {};
     fix_array(__waterchip_data);
@@ -18,4 +19,5 @@ inline procedure TestData_Initialize begin
     // Might include .current_test_name and .current_describe and stuff
     // like that in addition to storing the test results etc
     // ...
+
 end

@@ -11,4 +11,5 @@
 inline procedure TestRunner_Run begin
     debug("loading...");
     call TestData_Initialize;
+    debug("loaded.");
 end

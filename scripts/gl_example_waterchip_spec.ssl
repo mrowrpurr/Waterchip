@@ -4,43 +4,27 @@
 #include "sfall/lib.arrays.h"
 /////////////////////////////
 
-
-
 #include "Waterchip.h"
-
-variable test_initialization_complete = false;
-
-variable test_suite_data;
-
-variable currently_running_test_name;
-
-variable is_running_tests;
-
-variable times_run_tests = 0;
-
-variable test_suite_name = "describe name here";
-
-procedure start;
 
 procedure start begin
     debug("------------- start begin --------------");
-    debug1f("========[ %s ]=======", currently_running_test_name);
+    debug1f("========[ %s ]=======", __waterchip_testsuite_currently_running_test_name);
     /////////////////////
 
-    if currently_running_test_name then begin
-        debug3("", test_suite_name, currently_running_test_name, "SETUP");
+    if __waterchip_testsuite_currently_running_test_name then begin
+        debug3("", __waterchip__testsuite_name, __waterchip_testsuite_currently_running_test_name, "SETUP");
     end
 
     // Register a test
     // If the test has ALREADY been registered then it's time to RUN everything, yo.
-    if (not is_running_tests) and test_initialization_complete and scan_array(test_suite_data.test_names, "this test") > -1 and times_run_tests == 0 then begin
+    if (not __waterchip_testsuite_currently_running_tests) and scan_array(__waterchip_testsuite_data.test_names, "this test") > -1 and __waterchip__testsuite_times_run_tests_backup_test_var_to_verify_single_run == 0 then begin
         set_global_script_repeat(0); // turn it off!
-        times_run_tests++; // extra protection from multiple invocations
-        is_running_tests = true;
+        __waterchip__testsuite_times_run_tests_backup_test_var_to_verify_single_run++; // extra protection from multiple invocations
+        __waterchip_testsuite_currently_running_tests = true;
         debug("~~~~~~~~~~~~~~~~~~~~~~~");
-        debug1("running all tests in suite", test_suite_name);
-        foreach currently_running_test_name in (test_suite_data.test_names) begin
-            debug2("run test from loop", test_suite_name, currently_running_test_name);
+        debug1("running all tests in suite", __waterchip__testsuite_name);
+        foreach __waterchip_testsuite_currently_running_test_name in (__waterchip_testsuite_data.test_names) begin
+            debug2("run test from loop", __waterchip__testsuite_name, __waterchip_testsuite_currently_running_test_name);
             call start;
         end
         debug("~~~~~~~~~~~~~~~~~~~~~~~");
@@ -48,34 +32,36 @@ procedure start begin
         return;
     end
     if not waterchip_data then waterchip_data = __waterchip_data;
-    if not test_suite_data then begin
-        test_suite_data = {};
-        fix_array(test_suite_data);
-        waterchip_data[test_suite_name] = test_suite_data;
-        test_suite_data.test_names = [];
-        fix_array(test_suite_data.test_names);
-        test_suite_data.test_results = {};
-        fix_array(test_suite_data.test_results);
+    if not __waterchip_testsuite_data then begin
+        __waterchip_testsuite_data = {};
+        fix_array(__waterchip_testsuite_data);
+        waterchip_data[__waterchip__testsuite_name] = __waterchip_testsuite_data;
+        __waterchip_testsuite_data.test_names = [];
+        fix_array(__waterchip_testsuite_data.test_names);
+        __waterchip_testsuite_data.test_results = {};
+        fix_array(__waterchip_testsuite_data.test_results);
     end
-    if scan_array(test_suite_data.test_names, "this test") == -1 then begin
-        debug2("REGISTER test", test_suite_name, "this test");
-        call array_push(test_suite_data.test_names, "this test");
+    if scan_array(__waterchip_testsuite_data.test_names, "this test") == -1 then begin
+        debug2("REGISTER test", __waterchip__testsuite_name, "this test");
+        call array_push(__waterchip_testsuite_data.test_names, "this test");
+    end else if __waterchip_testsuite_currently_running_tests and __waterchip_testsuite_currently_running_test_name == "this test" then begin
+        debug2("RUN test", __waterchip__testsuite_name, "this test");
+    end
+    if not __waterchip_testsuite_repeat_initialized then begin
+        __waterchip_testsuite_repeat_initialized = true;
         set_global_script_repeat(1); // Run in 1 frame
-        test_initialization_complete = true;
-    end else if is_running_tests and currently_running_test_name == "this test" then begin
-        debug2("RUN test", test_suite_name, "this test");
     end
 
     // Register a test
     // If the test has ALREADY been registered then it's time to RUN everything, yo.
-    if (not is_running_tests) and test_initialization_complete and scan_array(test_suite_data.test_names, "another test") > -1 and times_run_tests == 0 then begin
+    if (not __waterchip_testsuite_currently_running_tests) and scan_array(__waterchip_testsuite_data.test_names, "another test") > -1 and __waterchip__testsuite_times_run_tests_backup_test_var_to_verify_single_run == 0 then begin
         set_global_script_repeat(0); // turn it off!
-        times_run_tests++; // extra protection from multiple invocations
-        is_running_tests = true;
+        __waterchip__testsuite_times_run_tests_backup_test_var_to_verify_single_run++; // extra protection from multiple invocations
+        __waterchip_testsuite_currently_running_tests = true;
         debug("~~~~~~~~~~~~~~~~~~~~~~~");
-        debug1("running all tests in suite", test_suite_name);
-        foreach currently_running_test_name in (test_suite_data.test_names) begin
-            debug2("run test from loop", test_suite_name, currently_running_test_name);
+        debug1("running all tests in suite", __waterchip__testsuite_name);
+        foreach __waterchip_testsuite_currently_running_test_name in (__waterchip_testsuite_data.test_names) begin
+            debug2("run test from loop", __waterchip__testsuite_name, __waterchip_testsuite_currently_running_test_name);
             call start;
         end
         debug("~~~~~~~~~~~~~~~~~~~~~~~");
@@ -83,31 +69,31 @@ procedure start begin
         return;
     end
     if not waterchip_data then waterchip_data = __waterchip_data;
-    if not test_suite_data then begin
-        test_suite_data = {};
-        fix_array(test_suite_data);
-        waterchip_data[test_suite_name] = test_suite_data;
-        test_suite_data.test_names = [];
-        fix_array(test_suite_data.test_names);
-        test_suite_data.test_results = {};
-        fix_array(test_suite_data.test_results);
+    if not __waterchip_testsuite_data then begin
+        __waterchip_testsuite_data = {};
+        fix_array(__waterchip_testsuite_data);
+        waterchip_data[__waterchip__testsuite_name] = __waterchip_testsuite_data;
+        __waterchip_testsuite_data.test_names = [];
+        fix_array(__waterchip_testsuite_data.test_names);
+        __waterchip_testsuite_data.test_results = {};
+        fix_array(__waterchip_testsuite_data.test_results);
     end
-    if scan_array(test_suite_data.test_names, "another test") == -1 then begin
-        debug2("REGISTER test", test_suite_name, "another test");
-        call array_push(test_suite_data.test_names, "another test");
+    if scan_array(__waterchip_testsuite_data.test_names, "another test") == -1 then begin
+        debug2("REGISTER test", __waterchip__testsuite_name, "another test");
+        call array_push(__waterchip_testsuite_data.test_names, "another test");
+    end else if __waterchip_testsuite_currently_running_tests and __waterchip_testsuite_currently_running_test_name == "another test" then begin
+        debug2("RUN test", __waterchip__testsuite_name, "another test");
+    end
+    if not __waterchip_testsuite_repeat_initialized then begin
+        __waterchip_testsuite_repeat_initialized = true;
         set_global_script_repeat(1); // Run in 1 frame
-        test_initialization_complete = true;
-    end else if is_running_tests and currently_running_test_name == "another test" then begin
-        debug2("RUN test", test_suite_name, "another test");
     end
 
-
-
-    if currently_running_test_name then begin
-        debug3("", test_suite_name, currently_running_test_name, "TEARDOWN");
+    if __waterchip_testsuite_currently_running_test_name then begin
+        debug3("", __waterchip__testsuite_name, __waterchip_testsuite_currently_running_test_name, "TEARDOWN");
     end
 
     /////////////////////
-    debug1f("========[ %s ]=======", currently_running_test_name);
+    debug1f("========[ %s ]=======", __waterchip_testsuite_currently_running_test_name);
     debug("------------- start end --------------");
 end

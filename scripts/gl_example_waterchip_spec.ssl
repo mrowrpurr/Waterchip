@@ -6,12 +6,13 @@
 
 #include "Waterchip.h"
 
-procedure start begin
+describe("some test suite") begin
+
     debug("------------- start begin --------------");
     debug1f("========[ %s ]=======", __waterchip_testsuite_currently_running_test_name);
     /////////////////////
 
-    if __waterchip_testsuite_currently_running_test_name then begin
+    setup begin
         debug3("", __waterchip__testsuite_name, __waterchip_testsuite_currently_running_test_name, "SETUP");
     end
 
@@ -89,7 +90,7 @@ procedure start begin
         set_global_script_repeat(1); // Run in 1 frame
     end
 
-    if __waterchip_testsuite_currently_running_test_name then begin
+    teardown then begin
         debug3("", __waterchip__testsuite_name, __waterchip_testsuite_currently_running_test_name, "TEARDOWN");
     end
 

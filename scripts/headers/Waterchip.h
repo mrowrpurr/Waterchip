@@ -9,9 +9,6 @@ import variable __waterchip_data;
 // Workaround for SSLC bug: Map accessors don't work on import/export variables.
 variable waterchip_data;
 
-// Stores the name provided via describe("") or context("") or test_suite("")
-variable __waterchip__testsuite_name = "Tests";
-
 // Reference to the data map for this test suite (in waterchip_data.test_suites)
 variable __waterchip_testsuite_data;
 
@@ -30,3 +27,24 @@ variable __waterchip_testsuite_currently_running_tests;
 // invoked via repeat when it's already running. I don't think this is needed.
 variable __waterchip__testsuite_times_run_tests_backup_test_var_to_verify_single_run = 0;
 
+// variable __waterchip__testsuite_name (created by the describe macro)
+// Stores the name provided via describe("") or context("") or test_suite("")
+//
+// Setup a test suite (creates the start procedure under the covers)
+#define describe(test_suite_name) \
+    variable __waterchip__testsuite_name = test_suite_name; \
+    procedure start
+
+// xUnit-ish alias for the BDD describe
+#define context(test_suite_name) describe(test_suite_name)
+
+// xUnit-ish alias for the BDD describe
+#define test_suite(test_suite_name) describe(test_suite_name)
+
+// Simply runs the provided block if any test is running. Merely semantics.
+// MUST be placed BEFORE all tests
+#define setup if __waterchip_testsuite_currently_running_test_name then
+
+// Simply runs the provided block if any test is running. Merely semantics.
+// MUST be placed AFTER all
+#define teardown if __waterchip_testsuite_currently_running_test_name then

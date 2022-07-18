@@ -1,0 +1,9 @@
+/*
+    Test Runner for Waterchip test/spec framework ~ by Mrowr Purr ~
+*/
+
+#include "Waterchip/TestRunner.h"
+
+procedure start begin
+    if game_loaded then call TestRunner_Run;
+end

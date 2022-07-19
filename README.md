@@ -14,7 +14,7 @@ describe("Inventory Helper") begin
     variable who = dude_obj;
 
     setup begin
-        call clear_inventory(who);
+        clear_inventory(who);
     end
 
     test("inventory should be empty") begin
@@ -23,7 +23,7 @@ describe("Inventory Helper") begin
     end
 
     test("can add weapon to dude's inventory") begin
-        call give_weapon(who, PID_SHOTGUN);
+        give_weapon(who, PID_SHOTGUN);
         expect(inven_count(who)) to_equal(1);
     end
 
@@ -48,46 +48,25 @@ Copy the latest [`Waterchip.h`](https://raw.githubusercontent.com/mrowrpurr/Wate
 
 ## Creating a new test script
 
-Create a new global script for each group of tests you would like to create.
+1. Create a new global script for each group of tests you would like to create.
+   > e.g. `scripts/gl_MyMod_InventoryHelperTest.ssl`
 
-e.g. `scripts/gl_MyMod_InventoryHelperTest.ssl`
+2. Include the Waterchip testing framework:
+    ```pas
+    #include "Waterchip.h"
+    ```
 
-Then `#include "Waterchip.h"`
+3. Include your own code from header files:
+    ```pas
+    // You should generally pull the code you want to test out into headers.
+    // There are also ways to interact with your running scripts, however.
+    #include "MyMod/InventoryHelper.h"
+    ```
 
-In your script, do **NOT** create a `procedure start`.
-
-Instead, initialize the script using `describe("name of your test group")`
-
-```pas
-#include "Waterchip.h"
-
-// Describe whatever it is that you're testing
-describe("My mod's Inventory Helper") begin
-
-end
-```
-
-## Writing your first test
-
-Inside of your test group, define one or more tests using `test("describe what you are testing")`
-
-```pas
-#include "Waterchip.h"
-
-// Describe whatever it is that you're testing
-describe("My mod's Inventory Helper") begin
-
-    test("can easily clear critter's inventory") begin
+4. Add a `describe()` to describe your group of tests in this file:
+    ```pas
+    // Let's say that you have inventory helper procedures you want to test
+    describe("MyMod Inventory Helper") begin
 
     end
-
-end
-```
-
-# Usage
-
-
-
-# Expectations
-
-
+    ```

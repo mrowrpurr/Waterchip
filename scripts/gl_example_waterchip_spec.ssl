@@ -1,35 +1,36 @@
 #include "Waterchip.h"
 
+// Example code /////////////////////////////
 #include "define.h"
 #include "command.h"
-
 procedure clear_inventory(variable who) begin
     while inven_count(who) > 0 do begin
         variable ptr = inven_ptr(who, 0);
         rm_obj_from_inven(who, ptr);
     end
 end
-
 procedure give_weapon(variable who, variable pid) begin
     add_obj_to_inven(who, create_object(pid, 0, 0));
 end
+///////////////////////////////////////////
 
 describe("Inventory Helper") begin
 
-    variable who = dude_obj;
+    variable critter;
 
     setup begin
-        call clear_inventory(who);
+        critter = create_object(PID_PHIL, 0, 0);
+        call clear_inventory(critter);
     end
 
     test("inventory should be empty") begin
-        expect(inven_count(who)) to_equal(0);
-        expect(inven_count(who)) not_to_equal(69);
+        expect(inven_count(critter)) to_equal(0);
+        expect(inven_count(critter)) not_to_equal(69);
     end
 
     test("can add weapon to dude's inventory") begin
-        call give_weapon(who, PID_SHOTGUN);
-        expect(inven_count(who)) to_equal(1);
+        call give_weapon(critter, PID_SHOTGUN);
+        expect(inven_count(critter)) to_equal(1);
     end
 
     xtest("can equip weapon in dude's hands") begin

@@ -30,6 +30,28 @@ describe("Inventory Helper") begin
 end
 ```
 
+---
+
+- [Installation](#installation)
+- [Getting Started](#getting-started)
+- [Syntax Reference](#)
+  - [`describe`](#)
+  - [`test`](#)
+  - [`skip`](#)
+  - [`setup`](#)
+  - [`teardown`](#)
+- [`expect()` Assertions](#)
+  - [`to_equal` / `not_to_equal`]()
+  - [`to_contain`]() (_support for strings and arrays and maps_)
+  - [`to_be_greater_than`]()
+  - [`to_be_greater_than_or_equal_to`]()
+  - [`to_be_less_than`]()
+  - [`to_be_less_than_or_equal_to`]()
+  - [`to_have_inventory_item`]()
+  - [`...`]()
+
+---
+
 # Installation
 
 1. Download the latest [`Waterchip.zip`](https://github.com/mrowrpurr/Waterchip/releases/latest/download/Waterchip.zip) release.

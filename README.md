@@ -1,2 +1,3 @@
-# waterchip
-Waterchip - a testing framework for Fallout 1/2
+# Waterchip - a testing framework for Fallout 1/2
+
+> Coming soon...

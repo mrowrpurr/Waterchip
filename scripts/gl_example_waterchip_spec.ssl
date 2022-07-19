@@ -1,25 +1,45 @@
-#define DEBUG_NAME "ExampleSpec"
-#include "FormattedDebug.h"
-/////////////////////////////
-
 #include "Waterchip.h"
 
-describe("some test suite") begin
+#include "define.h"
+#include "command.h"
+
+procedure clear_inventory(variable who) begin
+    while inven_count(who) > 0 do begin
+        variable ptr = inven_ptr(who, 0);
+        rm_obj_from_inven(who, ptr);
+    end
+end
+
+procedure give_weapon(variable who, variable pid) begin
+    add_obj_to_inven(who, create_object(pid, 0, 0));
+end
+
+describe("Inventory Helper") begin
+
+    variable who = dude_obj;
 
     setup begin
-        // debug("SETUP");
+        call clear_inventory(who);
     end
 
-    test("this test") begin
-        expect(69) to_equal(420);
+    test("inventory should be empty") begin
+        expect(inven_count(who)) to_equal(0);
+        expect(inven_count(who)) not_to_equal(69);
     end
 
-    test("another test") begin
-        expect(69) to_equal(69);
+    test("can add weapon to dude's inventory") begin
+        call give_weapon(who, PID_SHOTGUN);
+        expect(inven_count(who)) to_equal(1);
     end
+
+    xtest("can equip weapon in dude's hands") begin
+        print("hello. I am in test");
+    end
+
+    todo("Pending test without a body");
 
     teardown begin
-        // debug("TEARDOWN");
+        print("something that runs after each test");
     end
     
 end

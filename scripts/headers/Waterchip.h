@@ -1,3 +1,5 @@
+#pragma once
+
 /*
     Library for Waterchip test/spec framework ~ by Mrowr Purr ~
 
@@ -27,6 +29,7 @@
 
 #include "sfall/sfall.h"
 #include "sfall/lib.arrays.h"
+#include "sfall/lib.strings.h"
 
 // Imported variable for Waterchip test runner.
 import variable __waterchip_data;
@@ -57,6 +60,9 @@ variable __waterchip_testsuite_currently_running_tests;
 // A little bit of unnecessary backup protection in cast the script can be
 // invoked via repeat when it's already running. I don't think this is needed.
 variable __waterchip__testsuite_times_run_tests_backup_test_var_to_verify_single_run = 0;
+
+// Read the variable name (lol)
+variable __waterchip__legit_just_a_stupid_variable_for_todo_to_get_a_semicolon;
 
 // Current value selected via expect() for running assertions/expections on.
 variable __waterchip_testsuite_current_expect_value;
@@ -90,8 +96,22 @@ variable __waterchip_testsuite_total_skipped;
 #define WATERCHIP_TEST_RESULT_NOT_RUN "NOT_RUN"
 
 // Helpers for waterchip output
-#define __waterchip_debug_test_suite(text) debug_msg(sprintf_array("%s[%s] %s\n",      [__waterchip_output_prefix, __waterchip__testsuite_name, text]))
+//
+// TODO - do NOT use sprintf_array (so that people can use sprintf_array)
+//        you cannot sprintf_array inside of a sprintf_array
+//
+#define __waterchip_debug_test_suite(text) debug_msg(sprintf_array("%s[%s] %s\n",        [__waterchip_output_prefix, __waterchip__testsuite_name, text]))
 #define __waterchip_debug_test(text)       debug_msg(sprintf_array("%s[%s] [%s] [%s]\n", [__waterchip_output_prefix, __waterchip__testsuite_name, __waterchip_testsuite_currently_running_test_name, text]))
+
+// Print a message to the debug output (in the same format as Waterchip)
+#define print(text) \
+    if __waterchip_testsuite_data then \
+        if __waterchip_testsuite_currently_running_test_name then \
+            __waterchip_debug_test(text); \
+        else \
+            __waterchip_debug_test_suite(text); \
+    else \
+        debug_msg(__waterchip_output_prefix + " [] [] " + sprintf("[%s]", text))
 
 // variable __waterchip__testsuite_name (created by the describe macro)
 // Stores the name provided via describe("") or context("") or test_suite("")
@@ -164,7 +184,7 @@ variable __waterchip_testsuite_total_skipped;
             __waterchip_testsuite_currently_defining_skipped_test = false; \
             __waterchip_testsuite_data.test_results[test_name].status = WATERCHIP_TEST_RESULT_SKIPPED; \
         end \
-    end else if __waterchip_testsuite_currently_running_tests and __waterchip_testsuite_currently_running_test_name == test_name then
+    end else if __waterchip_testsuite_currently_running_tests and __waterchip_testsuite_currently_running_test_name == test_name and __waterchip_testsuite_data.test_results[test_name].status != WATERCHIP_TEST_RESULT_SKIPPED then
 
 // BDD-ish alias for the xUnit test()
 #define it(example_name) test(test_name)
@@ -176,19 +196,73 @@ variable __waterchip_testsuite_total_skipped;
     __waterchip_testsuite_currently_defining_skipped_test = true; \
     test(test_name)
 
-// RSpec/BDD-ish alias for skip
-#define pending(test_name) skip(test_name)
-
 // xtest common alias for skipping a test() easily
 #define xtest(test_name) skip(test_name)
 
 // xit common alias for skipping a it() example easily
 #define xit(test_name) skip(test_name)
 
+// Like xit, xtest, skip: but no body - just copy/pasted test and removed 'then'
+#define todo(test_name) \
+    __waterchip_testsuite_currently_defining_skipped_test = true; \
+    if not waterchip_data then waterchip_data = __waterchip_data; \
+    if not __waterchip_testsuite_data then begin \
+        __waterchip_testsuite_data = {}; \
+        fix_array(__waterchip_testsuite_data); \
+        waterchip_data[__waterchip__testsuite_name] = __waterchip_testsuite_data; \
+        __waterchip_testsuite_data.test_names = []; \
+        fix_array(__waterchip_testsuite_data.test_names); \
+        __waterchip_testsuite_data.test_results = {}; \
+        fix_array(__waterchip_testsuite_data.test_results); \
+    end \
+    if (not __waterchip_testsuite_currently_running_tests) and scan_array(__waterchip_testsuite_data.test_names, test_name) > -1 and __waterchip__testsuite_times_run_tests_backup_test_var_to_verify_single_run == 0 then begin \
+        set_global_script_repeat(0); \
+        __waterchip__testsuite_times_run_tests_backup_test_var_to_verify_single_run++; \
+        __waterchip_testsuite_currently_running_tests = true; \
+        foreach __waterchip_testsuite_currently_running_test_name in (__waterchip_testsuite_data.test_names) begin \
+            call start; \
+            if __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status == WATERCHIP_TEST_RESULT_NOT_RUN then begin \
+                __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status = WATERCHIP_TEST_RESULT_PASSED; \
+                __waterchip_testsuite_total_passed++; \
+            end else if __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status == WATERCHIP_TEST_RESULT_SKIPPED then \
+                __waterchip_testsuite_total_skipped++; \
+            __waterchip_debug_test(__waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status); \
+            if __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status == WATERCHIP_TEST_RESULT_FAILED then begin \
+                __waterchip_testsuite_total_failed++; \
+                __waterchip_testsuite_currently_running_test_failure_message_lines = string_split(__waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].failure_message, "\n"); \
+                foreach __waterchip_testsuite_currently_running_test_failure_message_line in __waterchip_testsuite_currently_running_test_failure_message_lines \
+                    __waterchip_debug_test(__waterchip_testsuite_currently_running_test_failure_message_line); \
+            end \
+        end \
+        if __waterchip_testsuite_total_failed > 0 then \
+            __waterchip_debug_test_suite("[Tests failed] [" + __waterchip_testsuite_total_failed + " failed, " + __waterchip_testsuite_total_passed + " passed, " + __waterchip_testsuite_total_skipped + " skipped]"); \
+        else \
+            __waterchip_debug_test_suite("[Tests passed] [" + __waterchip_testsuite_total_passed + " passed, " + __waterchip_testsuite_total_skipped + " skipped]"); \
+        return; \
+    end \
+    if not __waterchip_testsuite_repeat_initialized then begin \
+        __waterchip_testsuite_repeat_initialized = true; \
+        set_global_script_repeat(1); \
+    end \
+    if scan_array(__waterchip_testsuite_data.test_names, test_name) == -1 then begin \
+        call array_push(__waterchip_testsuite_data.test_names, test_name); \
+        __waterchip_testsuite_data.test_results[test_name] = { "status": WATERCHIP_TEST_RESULT_NOT_RUN }; \
+        fix_array(__waterchip_testsuite_data.test_results[test_name]); \
+        if __waterchip_testsuite_currently_defining_skipped_test then begin \
+            __waterchip_testsuite_currently_defining_skipped_test = false; \
+            __waterchip_testsuite_data.test_results[test_name].status = WATERCHIP_TEST_RESULT_SKIPPED; \
+        end \
+    end \
+    __waterchip__legit_just_a_stupid_variable_for_todo_to_get_a_semicolon = 0
+
+// Used by expectations or call yourself
 #define fail(message) \
     __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status = WATERCHIP_TEST_RESULT_FAILED; \
     __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].failure_message = message; \
     return
+
+// TODO
+// #define assert(boolean, message)
 
 // Mark a value for inspection via expectatins
 #define expect(value) __waterchip_testsuite_current_expect_value = value;
@@ -202,3 +276,4 @@ variable __waterchip_testsuite_total_skipped;
 #define not_to_equal(value) \
     if __waterchip_testsuite_current_expect_value == value then \
         fail(sprintf_array("Expected not to equal.\nExpected: '%s'\nActual: '%s'", [__waterchip_testsuite_current_expect_value, value]))
+       

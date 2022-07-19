@@ -33,7 +33,7 @@ end
 ---
 
 - [Installation](#installation)
-- [Getting Started](#getting-started)
+- [Getting Started Guide](#getting-started-guide)
 - [Syntax Reference](#)
   - [`describe`](#)
   - [`test`](#)
@@ -71,9 +71,7 @@ end
 2. _Copy [`gl___waterchip_test_runner.int`](https://github.com/mrowrpurr/Waterchip/raw/main/data/scripts/gl___waterchip_test_runner.int) into your `data/scripts/` folder._
 3. _Done!_
 
-# Getting Started
-
-## Creating a new test script
+# Getting Started Guide
 
 1. Create a new global script for each group of tests you would like to create.
    > e.g. `scripts/gl_MyMod_InventoryHelperTest.ssl`

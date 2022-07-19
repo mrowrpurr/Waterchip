@@ -7,19 +7,19 @@
 describe("some test suite") begin
 
     setup begin
-        debug("SETUP");
+        // debug("SETUP");
     end
 
     test("this test") begin
-        debug("this test");
+        expect(69) to_equal(420);
     end
 
     test("another test") begin
-        debug("another test");
+        expect(69) to_equal(69);
     end
 
     teardown begin
-        debug("TEARDOWN");
+        // debug("TEARDOWN");
     end
     
 end

@@ -1,2 +1,3 @@
 *.int
 !gl___waterchip_test_runner.int
+*.zip

@@ -43,11 +43,11 @@ end
 >
 > This is assuming that you use `scripts/HEADERS/` and the `mods/` folder.
 
-### Manual Installation
+### _Manual Installation_
 
-1. Copy the latest [`Waterchip.h`](https://raw.githubusercontent.com/mrowrpurr/Waterchip/main/scripts/headers/Waterchip.h) into your `scripts/HEADERS/` folder.
-2. Copy [`gl___waterchip_test_runner.int`](https://github.com/mrowrpurr/Waterchip/raw/main/data/scripts/gl___waterchip_test_runner.int) into your `data/scripts/` folder.
-3. Done!
+1. _Copy the latest [`Waterchip.h`](https://raw.githubusercontent.com/mrowrpurr/Waterchip/main/scripts/headers/Waterchip.h) into your `scripts/HEADERS/` folder._
+2. _Copy [`gl___waterchip_test_runner.int`](https://github.com/mrowrpurr/Waterchip/raw/main/data/scripts/gl___waterchip_test_runner.int) into your `data/scripts/` folder._
+3. _Done!_
 
 # Getting Started
 

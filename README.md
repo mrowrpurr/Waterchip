@@ -40,6 +40,7 @@ end
   - [`skip`](#)
   - [`setup`](#)
   - [`teardown`](#)
+  - [`print`](#)
 - [`expect()` Assertions](#)
   - [`to_equal` / `not_to_equal`]()
   - [`to_contain`]() (_support for strings and arrays and maps_)

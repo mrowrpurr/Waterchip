@@ -145,5 +145,6 @@ end
 
 10. Look in your `debug.log` and you should see something like this:
     ```
-    TODO example output
+    [Waterchip] [MyMod Inventory Helper] [can clear inventory] [PASS]
+    [Waterchip] [MyMod Inventory Helper] [Tests passed] [1 passed, 0 skipped]
     ```

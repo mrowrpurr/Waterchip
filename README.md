@@ -32,7 +32,22 @@ end
 
 # Installation
 
-Copy the latest [`Waterchip.h`](https://raw.githubusercontent.com/mrowrpurr/Waterchip/main/scripts/headers/Waterchip.h) into your `scripts/HEADERS/` folder.
+## Archive
+
+1. Download the latest [`Waterchip.zip`](https://github.com/mrowrpurr/Waterchip/releases/latest/download/Waterchip.zip) release.
+2. Extract it into your Fallout 2 folder.
+3. Done!
+
+> The archive includes 2 files:
+> 
+> - `scripts/HEADERS/Waterchip.h`
+> - `mods/Waterchip.dat`
+
+## Manual
+
+1. Copy the latest [`Waterchip.h`](https://raw.githubusercontent.com/mrowrpurr/Waterchip/main/scripts/headers/Waterchip.h) into your `scripts/HEADERS/` folder.
+2. Copy [`gl___waterchip_test_runner.int`](https://github.com/mrowrpurr/Waterchip/raw/main/data/scripts/gl___waterchip_test_runner.int) into your `data/scripts/` folder.
+3. Done!
 
 # Getting Started
 

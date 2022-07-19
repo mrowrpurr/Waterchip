@@ -8,35 +8,25 @@
 
 ```pas
 #include "Waterchip.h"
+#include "MyMod/InventoryHelper.h"
 
 describe("Inventory Helper") begin
-
-    variable who = dude_obj;
+    variable critter;
 
     setup begin
-        clear_inventory(who);
+        critter = create_object(PID_PHIL, 0, 0);
+        clear_inventory(critter);
     end
 
     test("inventory should be empty") begin
-        expect(inven_count(who)) to_equal(0);
-        expect(inven_count(who)) not_to_equal(69);
+        expect(inven_count(critter)) to_equal(0);
+        expect(inven_count(critter)) not_to_equal(69);
     end
 
     test("can add weapon to dude's inventory") begin
-        give_weapon(who, PID_SHOTGUN);
-        expect(inven_count(who)) to_equal(1);
+        give_weapon(critter, PID_SHOTGUN);
+        expect(inven_count(critter)) to_equal(1);
     end
-
-    xtest("can equip weapon in dude's hands") begin
-        print("hello. I am in test");
-    end
-
-    todo("Pending test without a body");
-
-    teardown begin
-        print("something that runs after each test");
-    end
-    
 end
 ```
 

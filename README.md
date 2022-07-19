@@ -72,6 +72,78 @@ end
     ```pas
     // Let's say that you have inventory helper procedures you want to test
     describe("MyMod Inventory Helper") begin
-
+        // Your tests will go here
     end
+    ```
+
+5. Add a `test()` to describe a specific piece of functionality you want to test:
+    ```pas
+    describe("MyMod Inventory Helper") begin
+        test("can clear inventory") begin
+            // Your test and assertions will go here
+        end
+    end
+    ```
+
+6. Arrange everything that you need for your test to run:
+    ```pas
+    describe("MyMod Inventory Helper") begin
+        // Variables are declared inside of the describe() above tests
+        variable critter;
+
+        test("can clear inventory") begin
+            // To test clearing inventory, we need a critter!
+            critter = create_object(PID_PHIL, 0, 0);
+            add_obj_to_inven(critter, create_object(PID_SHOTGUN, 0, 0));
+            // Now we have a critter with some inventory!
+
+            // Next, we want to call our inventory helper procedures
+            // to verify if they work! 
+        end
+    end
+    ```
+
+7. Now that you have your critter setup, time to call **your code** to verify it works:
+    ```pas
+    describe("MyMod Inventory Helper") begin
+        variable critter;
+
+        test("can clear inventory") begin
+            critter = create_object(PID_PHIL, 0, 0);
+            add_obj_to_inven(critter, create_object(PID_SHOTGUN, 0, 0));
+
+            // Call *something* from your code to test!
+            // This is just a simple example.
+            call InventoryHelper_ClearInventory(critter);
+        end
+    end
+    ```
+
+8. Make assertions to verify that your code works:
+    ```pas
+    describe("MyMod Inventory Helper") begin
+        variable critter;
+
+        test("can clear inventory") begin
+            critter = create_object(PID_PHIL, 0, 0);
+            add_obj_to_inven(critter, create_object(PID_SHOTGUN, 0, 0));
+
+            // Add an assertion *before* your procedure
+            // to verify that your test is setup properly
+            expect(inven_count(critter)) to_be_greater_than(0)
+
+            call InventoryHelper_ClearInventory(critter);
+
+            // Assert that it worked!
+            expect(inven_count(critter)) to_equal(0)
+        end
+    end
+    ```
+    > **TODO:** _add `to_be_greater_than` assertion_
+
+9. **Compile your code & run the game!**
+
+10. Look in your `debug.log` and you should see something like this:
+    ```
+    TODO example output
     ```

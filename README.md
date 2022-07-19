@@ -1,3 +1,7 @@
+> work in progress, hold tight...
+
+---
+
 # Waterchip 
 
 > Micro test framework for Fallout 2
@@ -42,11 +46,13 @@ Copy the latest [`Waterchip.h`](https://raw.githubusercontent.com/mrowrpurr/Wate
 
 # Getting Started
 
+## Creating a new test script
+
 Create a new global script for each group of tests you would like to create.
 
 e.g. `scripts/gl_MyMod_InventoryHelperTest.ssl`
 
-Then `#include 
+Then `#include "Waterchip.h"`
 
 In your script, do **NOT** create a `procedure start`.
 
@@ -61,6 +67,27 @@ describe("My mod's Inventory Helper") begin
 end
 ```
 
+## Writing your first test
+
+Inside of your test group, define one or more tests using `test("describe what you are testing")`
+
+```pas
+#include "Waterchip.h"
+
+// Describe whatever it is that you're testing
+describe("My mod's Inventory Helper") begin
+
+    test("can easily clear critter's inventory") begin
+
+    end
+
+end
+```
+
 # Usage
+
+
+
+# Expectations
 
 

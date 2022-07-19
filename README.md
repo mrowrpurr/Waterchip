@@ -42,6 +42,8 @@ end
 > 
 > - `scripts/HEADERS/Waterchip.h`
 > - `mods/Waterchip.dat`
+>
+> This is assuming that you use `scripts/HEADERS/` and the `mods/` folder.
 
 ## Manual
 

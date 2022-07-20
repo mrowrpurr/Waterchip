@@ -311,3 +311,27 @@ variable __waterchip_testsuite_total_skipped;
     if __waterchip_testsuite_current_expect_value == expected then \
         fail(sprintf_array("Expected not to equal.\nExpected: '%s'\nActual: '%s'", [expected, __waterchip_testsuite_current_expect_value]))
        
+#define to_be_zero to_equal(0)
+
+// Expectation for whether a string is empty or array has zero elements
+// typeof: 1 (int) 2 (float) 3 (string)
+#define to_be_empty \
+    switch typeof(__waterchip_testsuite_current_expect_value) begin \
+        case 1: begin \
+            if __waterchip_testsuite_current_expect_value then begin \
+                if len_array(__waterchip_testsuite_current_expect_value) == -1 then \
+                    fail("to_be_empty called on int which is not an array"); \
+                if len_array(__waterchip_testsuite_current_expect_value) > 0 then \
+                    fail(sprintf("Expected array to be empty, but contained %s elements/keys", len_array(__waterchip_testsuite_current_expect_value))); \
+            end \
+        end \
+        case 2: fail("to_be_empty called with a float (invalid argument)"); \
+        case 3: if strlen(__waterchip_testsuite_current_expect_value) > 0 then \
+            fail(sprintf("Expected string to be empty, but was \"%s\"", __waterchip_testsuite_current_expect_value)); \
+        default: print("not handling typeof " + typeof(__waterchip_testsuite_current_expect_value)); \
+    end \
+    __waterchip__use_in_macro_to_support_semicolon = 0
+
+// Expectation for whether a string contains a substring or array contains item 
+// typeof: 1 (int) 2 (float) 3 (string)
+#define to_contain 0

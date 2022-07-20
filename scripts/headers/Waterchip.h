@@ -268,7 +268,20 @@ variable __waterchip_testsuite_total_skipped;
     if __waterchip_testsuite_current_expect_value == expected then \
         fail(sprintf_array("Expected not to equal.\nExpected: '%s'\nActual: '%s'", [expected, __waterchip_testsuite_current_expect_value]))
        
+// Helper for asserting 0 value
 #define to_be_zero to_equal(0)
+
+// Helper or asserting true (1) value
+#define to_be_true to_equal(true)
+
+// Helper or asserting false (0) value
+#define to_be_false to_equal(false)
+
+// TODO
+#define to_be_truthy fail("NOT YET IMPLEMENTED: to_be_truthy");
+
+// TODO
+#define to_be_falsy fail("NOT YET IMPLEMENTED: to_be_falsy");
 
 // Expectation for whether a string is empty or array has zero elements
 // typeof: 1 (int) 2 (float) 3 (string)
@@ -291,4 +304,4 @@ variable __waterchip_testsuite_total_skipped;
 
 // Expectation for whether a string contains a substring or array contains item 
 // typeof: 1 (int) 2 (float) 3 (string)
-#define to_contain 0
+#define to_contain fail("NOT YET IMPLEMENTED: to_contain");

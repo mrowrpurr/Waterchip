@@ -25,6 +25,12 @@
 
     Feel free to write your own assert_x() xUnit-style macros!
 
+    # FAQ
+
+    Question: "WTF THIS IS TOTAL MADNESS!? WTH??"
+
+    Answer: Yep, Agreed ;)
+
 */
 
 #include "sfall/sfall.h"
@@ -62,7 +68,11 @@ variable __waterchip_testsuite_currently_running_tests;
 variable __waterchip__testsuite_times_run_tests_backup_test_var_to_verify_single_run = 0;
 
 // Read the variable name (lol)
-variable __waterchip__legit_just_a_stupid_variable_for_todo_to_get_a_semicolon;
+// Some of our macros end on `end` which you cannot add a ; semicolon after.
+// So we just finish the macro with:
+//    __waterchip__use_in_macro_to_support_semicolon = 0
+// It's dumb but it provides a consistent syntax for developer experience
+variable __waterchip__use_in_macro_to_support_semicolon;
 
 // Current value selected via expect() for running assertions/expections on.
 variable __waterchip_testsuite_current_expect_value;
@@ -74,6 +84,9 @@ variable __waterchip_output_prefix = "[Waterchip] ";
 // So we can __waterchip_debug_test each line (for debug log filtering)
 variable __waterchip_testsuite_currently_running_test_failure_message_line;
 variable __waterchip_testsuite_currently_running_test_failure_message_lines;
+
+// For with_msg to provide your own failure expectation message
+variable __waterchip_testsuite_current_expect_failure_message;
 
 // Counts for outputting full test results.
 // Either we increment counters or we loop over the test_results
@@ -113,6 +126,9 @@ variable __waterchip_testsuite_total_skipped;
     else \
         debug_msg(__waterchip_output_prefix + " [] [] " + sprintf("[%s]", text))
 
+// Helper for print(sprintf())
+#define printf(text, argument) print(sprintf(text, argument))
+
 // variable __waterchip__testsuite_name (created by the describe macro)
 // Stores the name provided via describe("") or context("") or test_suite("")
 //
@@ -139,6 +155,7 @@ variable __waterchip_testsuite_total_skipped;
 #define test(test_name) \
     if not waterchip_data then waterchip_data = __waterchip_data; \
     if not __waterchip_testsuite_data then begin \
+        __waterchip_debug_test_suite(""); \
         __waterchip_testsuite_data = {}; \
         fix_array(__waterchip_testsuite_data); \
         waterchip_data[__waterchip__testsuite_name] = __waterchip_testsuite_data; \
@@ -187,10 +204,10 @@ variable __waterchip_testsuite_total_skipped;
     end else if __waterchip_testsuite_currently_running_tests and __waterchip_testsuite_currently_running_test_name == test_name and __waterchip_testsuite_data.test_results[test_name].status != WATERCHIP_TEST_RESULT_SKIPPED then
 
 // BDD-ish alias for the xUnit test()
-#define it(example_name) test(test_name)
+#define it(example_name) test(example_name)
 
 // BDD-ish alias for the xUnit test()
-#define example(example_name) test(test_name)
+#define example(example_name) test(example_name)
 
 #define skip(test_name) \
     __waterchip_testsuite_currently_defining_skipped_test = true; \
@@ -207,6 +224,7 @@ variable __waterchip_testsuite_total_skipped;
     __waterchip_testsuite_currently_defining_skipped_test = true; \
     if not waterchip_data then waterchip_data = __waterchip_data; \
     if not __waterchip_testsuite_data then begin \
+        __waterchip_debug_test_suite(""); \
         __waterchip_testsuite_data = {}; \
         fix_array(__waterchip_testsuite_data); \
         waterchip_data[__waterchip__testsuite_name] = __waterchip_testsuite_data; \
@@ -253,27 +271,43 @@ variable __waterchip_testsuite_total_skipped;
             __waterchip_testsuite_data.test_results[test_name].status = WATERCHIP_TEST_RESULT_SKIPPED; \
         end \
     end \
-    __waterchip__legit_just_a_stupid_variable_for_todo_to_get_a_semicolon = 0
+    __waterchip__use_in_macro_to_support_semicolon = 0
 
 // Used by expectations or call yourself
 #define fail(message) \
-    __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status = WATERCHIP_TEST_RESULT_FAILED; \
-    __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].failure_message = message; \
-    return
+    begin \
+        __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status = WATERCHIP_TEST_RESULT_FAILED; \
+        if __waterchip_testsuite_current_expect_failure_message then begin \
+            __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].failure_message = __waterchip_testsuite_current_expect_failure_message + ": " + message; \
+        end else \
+            __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].failure_message = message; \
+        return; \
+    end \
+    __waterchip__use_in_macro_to_support_semicolon = 0
+
+// Provide your own message to prepend to the expectation failure message
+#define with_msg(text) __waterchip_testsuite_current_expect_failure_message = text;
 
 // TODO
 // #define assert(boolean, message)
 
 // Mark a value for inspection via expectatins
-#define expect(value) __waterchip_testsuite_current_expect_value = value;
+#define expect(value) \
+    begin \
+        __waterchip_testsuite_current_expect_value = value; \
+        __waterchip_testsuite_current_expect_failure_message = 0; \
+    end
 
 // Expectation for equality
-#define to_equal(value) \
-    if __waterchip_testsuite_current_expect_value != value then \
-        fail(sprintf_array("Expected to equal.\nExpected: '%s'\nActual: '%s'", [__waterchip_testsuite_current_expect_value, value]))
+#define to_equal(expected) \
+    begin \
+        if __waterchip_testsuite_current_expect_value != expected then \
+            fail(sprintf_array("Expected to equal.\nExpected: '%s'\nActual: '%s'", [expected, __waterchip_testsuite_current_expect_value])); \
+    end \
+    __waterchip__use_in_macro_to_support_semicolon = 0
 
 // Expectation for inequality
-#define not_to_equal(value) \
-    if __waterchip_testsuite_current_expect_value == value then \
-        fail(sprintf_array("Expected not to equal.\nExpected: '%s'\nActual: '%s'", [__waterchip_testsuite_current_expect_value, value]))
+#define not_to_equal(expected) \
+    if __waterchip_testsuite_current_expect_value == expected then \
+        fail(sprintf_array("Expected not to equal.\nExpected: '%s'\nActual: '%s'", [expected, __waterchip_testsuite_current_expect_value]))
        

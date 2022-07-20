@@ -169,7 +169,8 @@ variable __waterchip_testsuite_total_skipped;
         __waterchip__testsuite_times_run_tests_backup_test_var_to_verify_single_run++; \
         __waterchip_testsuite_currently_running_tests = true; \
         foreach __waterchip_testsuite_currently_running_test_name in (__waterchip_testsuite_data.test_names) begin \
-            call start; \
+            if __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status != WATERCHIP_TEST_RESULT_SKIPPED then \
+                call start; \
             if __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status == WATERCHIP_TEST_RESULT_NOT_RUN then begin \
                 __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status = WATERCHIP_TEST_RESULT_PASSED; \
                 __waterchip_testsuite_total_passed++; \
@@ -238,7 +239,8 @@ variable __waterchip_testsuite_total_skipped;
         __waterchip__testsuite_times_run_tests_backup_test_var_to_verify_single_run++; \
         __waterchip_testsuite_currently_running_tests = true; \
         foreach __waterchip_testsuite_currently_running_test_name in (__waterchip_testsuite_data.test_names) begin \
-            call start; \
+            if __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status != WATERCHIP_TEST_RESULT_SKIPPED then \
+                call start; \
             if __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status == WATERCHIP_TEST_RESULT_NOT_RUN then begin \
                 __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status = WATERCHIP_TEST_RESULT_PASSED; \
                 __waterchip_testsuite_total_passed++; \

@@ -64,6 +64,10 @@ variable __waterchip_testsuite_currently_running_test_name;
 // Whether or not the test currently being defined is a 'pending'/'skip' test
 variable __waterchip_testsuite_currently_defining_skipped_test;
 
+// Is this the first test() which is being run in the suite?
+// If so, the setup_once is evaluated, if defined.
+variable __waterchip_testsuite_first_test_run = true;
+
 // Whether or not the script is currently running tests
 // Set to true when it detects it's running via repeat (1 frame after setup)
 // After which the repeat is disabled for the script
@@ -140,23 +144,16 @@ variable __waterchip_testsuite_total_skipped;
     variable __waterchip__testsuite_name = test_suite_name; \
     procedure start
 
-// xUnit-ish alias for the BDD describe()
-#define context(test_suite_name) describe(test_suite_name)
-
-// xUnit-ish alias for the BDD describe()
-#define test_suite(test_suite_name) describe(test_suite_name)
+// Runs a block of code *once* (when the first test is executed)
+#define setup_once if __waterchip_testsuite_currently_running_test_name and __waterchip_testsuite_first_test_run then
 
 // Simply runs the provided block if any test is running. Merely semantics.
 // MUST be placed BEFORE all tests
 #define setup if __waterchip_testsuite_currently_running_test_name then
-#define before setup
-#define before_each setup
 
 // Simply runs the provided block if any test is running. Merely semantics.
 // MUST be placed AFTER all
 #define teardown if __waterchip_testsuite_currently_running_test_name then
-#define after teardown
-#define after_each teardown
 
 // Register a test
 #define test(test_name) \
@@ -306,8 +303,10 @@ variable __waterchip_testsuite_total_skipped;
         __waterchip__testsuite_times_run_tests_backup_test_var_to_verify_single_run++; \
         __waterchip_testsuite_currently_running_tests = true; \
         foreach __waterchip_testsuite_currently_running_test_name in (__waterchip_testsuite_data.test_names) begin \
-            if __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status != WATERCHIP_TEST_RESULT_SKIPPED then \
+            if __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status != WATERCHIP_TEST_RESULT_SKIPPED then begin \
                 call start; \
+                __waterchip_testsuite_first_test_run = false; \
+            end \
             if __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status == WATERCHIP_TEST_RESULT_NOT_RUN then begin \
                 __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status = WATERCHIP_TEST_RESULT_PASSED; \
                 __waterchip_testsuite_total_passed++; \
@@ -340,3 +339,19 @@ variable __waterchip_testsuite_total_skipped;
             __waterchip_testsuite_data.test_results[test_name].status = WATERCHIP_TEST_RESULT_SKIPPED; \
         end \
     end
+
+/****************************************
+  Aliases (to move to another #include)
+*****************************************/
+
+// #define after teardown
+// #define after_each teardown
+
+// #define before setup
+// #define before_each setup
+
+// // xUnit-ish alias for the BDD describe()
+// #define context(test_suite_name) describe(test_suite_name)
+
+// // xUnit-ish alias for the BDD describe()
+// #define test_suite(test_suite_name) describe(test_suite_name)

@@ -1,5 +1,11 @@
 #pragma once
 
+// TODO remote all sprintf for any expected/actual which could be a float (basically anything)
+//      because %s displays floats incorrectly!
+
+// TODO move alternative syntax aliases to Waterchip/Something.h
+//      to not pollute the namespace with lots of named defines!
+
 /*
     Library for Waterchip test/spec framework ~ by Mrowr Purr ~
 
@@ -67,13 +73,6 @@ variable __waterchip_testsuite_currently_running_tests;
 // invoked via repeat when it's already running. I don't think this is needed.
 variable __waterchip__testsuite_times_run_tests_backup_test_var_to_verify_single_run = 0;
 
-// Read the variable name (lol)
-// Some of our macros end on `end` which you cannot add a ; semicolon after.
-// So we just finish the macro with:
-//    __waterchip__use_in_macro_to_support_semicolon = 0
-// It's dumb but it provides a consistent syntax for developer experience
-variable __waterchip__use_in_macro_to_support_semicolon;
-
 // Current value selected via expect() for running assertions/expections on.
 variable __waterchip_testsuite_current_expect_value;
 
@@ -129,6 +128,10 @@ variable __waterchip_testsuite_total_skipped;
 // Helper for print(sprintf())
 #define printf(text, argument) print(sprintf(text, argument))
 
+/***********************************
+    DSL for defining test suites
+************************************/
+
 // variable __waterchip__testsuite_name (created by the describe macro)
 // Stores the name provided via describe("") or context("") or test_suite("")
 //
@@ -146,10 +149,144 @@ variable __waterchip_testsuite_total_skipped;
 // Simply runs the provided block if any test is running. Merely semantics.
 // MUST be placed BEFORE all tests
 #define setup if __waterchip_testsuite_currently_running_test_name then
+#define before setup
+#define before_each setup
 
 // Simply runs the provided block if any test is running. Merely semantics.
 // MUST be placed AFTER all
 #define teardown if __waterchip_testsuite_currently_running_test_name then
+#define after teardown
+#define after_each teardown
+
+// Register a test
+#define test(test_name) \
+    __waterchip_test_macro_start(test_name) else if __waterchip_testsuite_currently_running_tests and __waterchip_testsuite_currently_running_test_name == test_name and __waterchip_testsuite_data.test_results[test_name].status != WATERCHIP_TEST_RESULT_SKIPPED then
+
+// BDD-ish alias for the xUnit test()
+#define it(example_name) test(example_name)
+
+// BDD-ish alias for the xUnit test()
+#define example(example_name) test(example_name)
+
+#define skip(test_name) \
+    __waterchip_testsuite_currently_defining_skipped_test = true; \
+    test(test_name)
+
+// xtest common alias for skipping a test() easily
+#define xtest(test_name) skip(test_name)
+
+// xit common alias for skipping a it() example easily
+#define xit(test_name) skip(test_name)
+
+// Like xit, xtest, skip: but no body - just copy/pasted test and removed 'then'
+#define todo(test_name) \
+    __waterchip_testsuite_currently_defining_skipped_test = true; \
+    __waterchip_test_macro_start(test_name) \
+    false
+
+/**************************
+        EXPECTATIONS
+***************************/
+
+// Used by expectations or call yourself
+#define fail(message) \
+    begin \
+        __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status = WATERCHIP_TEST_RESULT_FAILED; \
+        if __waterchip_testsuite_current_expect_failure_message then begin \
+            __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].failure_message = __waterchip_testsuite_current_expect_failure_message + ": " + message; \
+        end else \
+            __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].failure_message = message; \
+        return; \
+    end \
+    false
+
+// Provide your own message to prepend to the expectation failure message
+#define with_msg(text) __waterchip_testsuite_current_expect_failure_message = text;
+
+// TODO
+// #define assert(boolean, message)
+
+// Mark a value for inspection via expectatins
+#define expect(value) \
+    begin \
+        __waterchip_testsuite_current_expect_value = value; \
+        __waterchip_testsuite_current_expect_failure_message = 0; \
+    end
+
+// Expectation for equality
+#define to_equal(expected) \
+    begin \
+        if __waterchip_testsuite_current_expect_value != expected then \
+            fail("Expected to equal.\nExpected: '" + expected + "'\nActual: '" + __waterchip_testsuite_current_expect_value + "'"); \
+    end \
+    false
+
+// Expectation for inequality
+#define not_to_equal(expected) \
+    if __waterchip_testsuite_current_expect_value == expected then \
+        fail("Expected not to equal.\nExpected: '" + expected + "'\nActual: '" + __waterchip_testsuite_current_expect_value + "'")
+       
+// Helper for asserting 0 value
+#define to_be_zero     to_equal(0)
+#define not_to_be_zero not_to_equal(0)
+
+// Helper or asserting true (1) value
+#define to_be_true     to_equal(true)
+#define not_to_be_true not_to_equal(true)
+
+// Helper or asserting false (0) value
+#define to_be_false     to_equal(false)
+#define not_to_be_false not_to_equal(false)
+
+// TODO
+#define to_be_truthy fail("NOT YET IMPLEMENTED: to_be_truthy");
+
+// TODO
+#define to_be_falsy fail("NOT YET IMPLEMENTED: to_be_falsy");
+
+// Expectation for whether a string is empty or array has zero elements
+// typeof: 1 (int) 2 (float) 3 (string)
+#define to_be_empty \
+    switch typeof(__waterchip_testsuite_current_expect_value) begin \
+        case 1: begin \
+            if __waterchip_testsuite_current_expect_value then begin \
+                if len_array(__waterchip_testsuite_current_expect_value) == -1 then \
+                    fail("to_be_empty called on int which is not an array"); \
+                if len_array(__waterchip_testsuite_current_expect_value) > 0 then \
+                    fail(sprintf("Expected array to be empty, but contained %s elements/keys", len_array(__waterchip_testsuite_current_expect_value))); \
+            end \
+        end \
+        case 2: fail("to_be_empty called with a float (invalid argument)"); \
+        case 3: if strlen(__waterchip_testsuite_current_expect_value) > 0 then \
+            fail(sprintf("Expected string to be empty, but was \"%s\"", __waterchip_testsuite_current_expect_value)); \
+    end \
+    false
+
+// Expectation for whether a string is empty or array has zero elements
+// typeof: 1 (int) 2 (float) 3 (string)
+#define not_to_be_empty \
+    switch typeof(__waterchip_testsuite_current_expect_value) begin \
+        case 1: begin \
+            if __waterchip_testsuite_current_expect_value then begin \
+                if len_array(__waterchip_testsuite_current_expect_value) == -1 then \
+                    fail("to_be_empty called on int which is not an array"); \
+                if len_array(__waterchip_testsuite_current_expect_value) == 0 then \
+                    fail("Expected array not to be empty, but had 0 elements"); \
+            end \
+        end \
+        case 2: fail("to_be_empty called with a float (invalid argument)"); \
+        case 3: if strlen(__waterchip_testsuite_current_expect_value) == 0 then \
+            fail("Expected string not to be empty, but had 0 length"); \
+    end \
+    false
+
+// Expectation for whether a string contains a substring or array contains item 
+// typeof: 1 (int) 2 (float) 3 (string)
+#define to_contain fail("NOT YET IMPLEMENTED: to_contain");
+
+/****************************************
+   Primary macro for defining tests
+*****************************************/
 
 // Shared code between `test` and `todo`
 #define __waterchip_test_macro_start(test_name) \
@@ -203,105 +340,3 @@ variable __waterchip_testsuite_total_skipped;
             __waterchip_testsuite_data.test_results[test_name].status = WATERCHIP_TEST_RESULT_SKIPPED; \
         end \
     end
-
-// Register a test
-#define test(test_name) \
-    __waterchip_test_macro_start(test_name) else if __waterchip_testsuite_currently_running_tests and __waterchip_testsuite_currently_running_test_name == test_name and __waterchip_testsuite_data.test_results[test_name].status != WATERCHIP_TEST_RESULT_SKIPPED then
-
-// BDD-ish alias for the xUnit test()
-#define it(example_name) test(example_name)
-
-// BDD-ish alias for the xUnit test()
-#define example(example_name) test(example_name)
-
-#define skip(test_name) \
-    __waterchip_testsuite_currently_defining_skipped_test = true; \
-    test(test_name)
-
-// xtest common alias for skipping a test() easily
-#define xtest(test_name) skip(test_name)
-
-// xit common alias for skipping a it() example easily
-#define xit(test_name) skip(test_name)
-
-// Like xit, xtest, skip: but no body - just copy/pasted test and removed 'then'
-#define todo(test_name) \
-    __waterchip_testsuite_currently_defining_skipped_test = true; \
-    __waterchip_test_macro_start(test_name) \
-    __waterchip__use_in_macro_to_support_semicolon = 0
-
-// Used by expectations or call yourself
-#define fail(message) \
-    begin \
-        __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status = WATERCHIP_TEST_RESULT_FAILED; \
-        if __waterchip_testsuite_current_expect_failure_message then begin \
-            __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].failure_message = __waterchip_testsuite_current_expect_failure_message + ": " + message; \
-        end else \
-            __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].failure_message = message; \
-        return; \
-    end \
-    __waterchip__use_in_macro_to_support_semicolon = 0
-
-// Provide your own message to prepend to the expectation failure message
-#define with_msg(text) __waterchip_testsuite_current_expect_failure_message = text;
-
-// TODO
-// #define assert(boolean, message)
-
-// Mark a value for inspection via expectatins
-#define expect(value) \
-    begin \
-        __waterchip_testsuite_current_expect_value = value; \
-        __waterchip_testsuite_current_expect_failure_message = 0; \
-    end
-
-// Expectation for equality
-#define to_equal(expected) \
-    begin \
-        if __waterchip_testsuite_current_expect_value != expected then \
-            fail(sprintf_array("Expected to equal.\nExpected: '%s'\nActual: '%s'", [expected, __waterchip_testsuite_current_expect_value])); \
-    end \
-    __waterchip__use_in_macro_to_support_semicolon = 0
-
-// Expectation for inequality
-#define not_to_equal(expected) \
-    if __waterchip_testsuite_current_expect_value == expected then \
-        fail(sprintf_array("Expected not to equal.\nExpected: '%s'\nActual: '%s'", [expected, __waterchip_testsuite_current_expect_value]))
-       
-// Helper for asserting 0 value
-#define to_be_zero to_equal(0)
-
-// Helper or asserting true (1) value
-#define to_be_true to_equal(true)
-
-// Helper or asserting false (0) value
-#define to_be_false to_equal(false)
-
-// TODO
-#define to_be_truthy fail("NOT YET IMPLEMENTED: to_be_truthy");
-
-// TODO
-#define to_be_falsy fail("NOT YET IMPLEMENTED: to_be_falsy");
-
-// Expectation for whether a string is empty or array has zero elements
-// typeof: 1 (int) 2 (float) 3 (string)
-#define to_be_empty \
-    switch typeof(__waterchip_testsuite_current_expect_value) begin \
-        case 1: begin \
-            if __waterchip_testsuite_current_expect_value then begin \
-                if len_array(__waterchip_testsuite_current_expect_value) == -1 then \
-                    fail("to_be_empty called on int which is not an array"); \
-                if len_array(__waterchip_testsuite_current_expect_value) > 0 then \
-                    fail(sprintf("Expected array to be empty, but contained %s elements/keys", len_array(__waterchip_testsuite_current_expect_value))); \
-            end \
-        end \
-        case 2: fail("to_be_empty called with a float (invalid argument)"); \
-        case 3: if strlen(__waterchip_testsuite_current_expect_value) > 0 then \
-            fail(sprintf("Expected string to be empty, but was \"%s\"", __waterchip_testsuite_current_expect_value)); \
-        default: print("not handling typeof " + typeof(__waterchip_testsuite_current_expect_value)); \
-    end \
-    __waterchip__use_in_macro_to_support_semicolon = 0
-
-// Expectation for whether a string contains a substring or array contains item 
-// typeof: 1 (int) 2 (float) 3 (string)
-#define to_contain fail("NOT YET IMPLEMENTED: to_contain");

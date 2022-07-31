@@ -321,7 +321,14 @@ variable __waterchip_testsuite_total_skipped;
                 __waterchip_testsuite_total_passed++; \
             end else if __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status == WATERCHIP_TEST_RESULT_SKIPPED then \
                 __waterchip_testsuite_total_skipped++; \
-            __waterchip_debug_test(__waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status); \
+            switch (__waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status) begin \
+                case WATERCHIP_TEST_RESULT_PASSED: if __waterchip_config.output.show_passed != "0" then \
+                    __waterchip_debug_test(__waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status); \
+                case WATERCHIP_TEST_RESULT_SKIPPED: if __waterchip_config.output.show_skipped != "0" then \
+                    __waterchip_debug_test(__waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status); \
+                case WATERCHIP_TEST_RESULT_FAILED: if __waterchip_config.output.show_failed != "0" then \
+                    __waterchip_debug_test(__waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status); \
+            end \
             if __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status == WATERCHIP_TEST_RESULT_FAILED then begin \
                 __waterchip_testsuite_total_failed++; \
                 __waterchip_testsuite_currently_running_test_failure_message_lines = string_split(__waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].failure_message, "\n"); \

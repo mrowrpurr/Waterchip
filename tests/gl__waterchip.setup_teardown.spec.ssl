@@ -1,0 +1,9 @@
+#include "Waterchip.h"
+
+describe("Waterchip - Setup and Teardown") begin
+
+    test("quick test") begin
+        print("does this run with this file name?");
+    end
+    
+end

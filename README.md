@@ -2,9 +2,13 @@
 
 ---
 
+<img src="https://github.com/mrowrpurr/Waterchip/blob/main/images/waterchip.gif?raw=true" align="left">
+
 # Waterchip 
 
 > Micro test framework for Fallout 2
+
+---
 
 ```pas
 #include "Waterchip.h"

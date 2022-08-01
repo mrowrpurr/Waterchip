@@ -61,6 +61,14 @@ variable __waterchip_testsuite_repeat_initialized = false;
 // Name of the currentlt running test
 variable __waterchip_testsuite_currently_running_test_name;
 
+// Are we running the teardown? Teardown is executed via separate function FYI.
+// It can NOT access variables defined inside of the describe() block.
+// This is a "surprising" feature, so we'll try to change it later!
+variable __waterchip_testsuite_currently_running_teardown;
+
+// Was a teardown defined?
+variable __waterchip_testsuite_teardown_defined;
+
 // Whether or not the test currently being defined is a 'pending'/'skip' test
 variable __waterchip_testsuite_currently_defining_skipped_test;
 
@@ -149,15 +157,16 @@ variable __waterchip_testsuite_total_skipped;
 
 // Simply runs the provided block if any test is running. Merely semantics.
 // MUST be placed BEFORE all tests
-#define setup if __waterchip_testsuite_currently_running_test_name then
+#define setup if __waterchip_testsuite_currently_running_test_name and not __waterchip_testsuite_currently_running_teardown then
 
 // Simply runs the provided block if any test is running. Merely semantics.
 // MUST be placed AFTER all
-#define teardown if __waterchip_testsuite_currently_running_test_name then
+#define teardown __waterchip_testsuite_teardown_defined = true; \
+    if __waterchip_testsuite_currently_running_teardown then
 
 // Register a test
 #define test(test_name) \
-    __waterchip_test_macro_start(test_name) else if __waterchip_testsuite_currently_running_tests and __waterchip_testsuite_currently_running_test_name == test_name and __waterchip_testsuite_data.test_results[test_name].status != WATERCHIP_TEST_RESULT_SKIPPED then
+    __waterchip_test_macro_start(test_name) else if __waterchip_testsuite_currently_running_tests and not __waterchip_testsuite_currently_running_teardown and __waterchip_testsuite_currently_running_test_name == test_name and __waterchip_testsuite_data.test_results[test_name].status != WATERCHIP_TEST_RESULT_SKIPPED then
 
 // BDD-ish alias for the xUnit test()
 #define it(example_name) test(example_name)
@@ -221,14 +230,14 @@ variable __waterchip_testsuite_total_skipped;
         fail("Expected not to equal.\nExpected: '" + expected + "'\nActual: '" + __waterchip_testsuite_current_expect_value + "'")
 
 // Does a string start with something?
-// #define to_start_with(expected) \
-//     switch typeof(__waterchip_testsuite_current_expect_value) begin \
-//         case 1: fail(); \
-//         case 2: fail("to_be_empty called with a float (invalid argument)"); \
-//         case 3: if strlen(__waterchip_testsuite_current_expect_value) > 0 then \
-//             fail(sprintf("Expected string to be empty, but was \"%s\"", __waterchip_testsuite_current_expect_value)); \
-//     end \
-//     false
+#define to_start_with(expected) \
+    switch typeof(__waterchip_testsuite_current_expect_value) begin \
+        case 1: fail("to_start_with requires string, called with integer: " + __waterchip_testsuite_current_expect_value); \
+        case 2: fail("to_start_with requires string, called with float: " + __waterchip_testsuite_current_expect_value); \
+        case 3: if not string_starts_with(__waterchip_testsuite_current_expect_value, expected) then \
+            fail("Expected string to start with.\nExpectd: '" + expected + "'\nActual: '" + __waterchip_testsuite_current_expect_value + "'"); \
+    end \
+    false
        
 // Helper for asserting 0 value
 #define to_be_zero     to_equal(0)
@@ -315,6 +324,11 @@ variable __waterchip_testsuite_total_skipped;
             if __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status != WATERCHIP_TEST_RESULT_SKIPPED then begin \
                 call start; \
                 __waterchip_testsuite_first_test_run = false; \
+                if __waterchip_testsuite_teardown_defined then begin \
+                    __waterchip_testsuite_currently_running_teardown = true; \
+                    call start; \
+                    __waterchip_testsuite_currently_running_teardown = false; \
+                end \
             end \
             if __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status == WATERCHIP_TEST_RESULT_NOT_RUN then begin \
                 __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status = WATERCHIP_TEST_RESULT_PASSED; \

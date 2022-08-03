@@ -40,41 +40,26 @@ end
 - [Getting Started Guide](#getting-started-guide)
 - [Syntax Reference](#)
   - [`describe`](#)
-  - [`test`](#)
-  - [`skip`](#)
+  - [`it`](#)
   - [`setup`](#)
   - [`teardown`](#)
   - [`print`](#)
 - [`expect()` Assertions](#)
   - [`to_equal` / `not_to_equal`]()
   - [`to_contain`]() (_support for strings and arrays and maps_)
-  - [`to_be_greater_than`]()
-  - [`to_be_greater_than_or_equal_to`]()
-  - [`to_be_less_than`]()
-  - [`to_be_less_than_or_equal_to`]()
-  - [`to_have_inventory_item`]()
-  - [`...`]()
+  - [`to_have_length`](#)
+  - [`to_be_greater_than`](#)
+  - [`to_be_greater_than_or_equal_to`](#)
+  - [`to_be_less_than`](#)
+  - [`to_be_less_than_or_equal_to`](#)
+  - [`to_have_inventory_item`](#)
+  - [`...`](#)
 
 ---
 
 # Installation
 
-1. Download the latest [`Waterchip.zip`](https://github.com/mrowrpurr/Waterchip/releases/latest/download/Waterchip.zip) release.
-2. Extract it into your Fallout 2 folder.
-3. Done!
-
-> The archive includes 2 files:
-> 
-> - `scripts/HEADERS/Waterchip.h`
-> - `mods/Waterchip.dat`
->
-> This is assuming that you use `scripts/HEADERS/` and the `mods/` folder.
-
-### _Manual Installation_
-
-1. _Copy the latest [`Waterchip.h`](https://raw.githubusercontent.com/mrowrpurr/Waterchip/main/scripts/headers/Waterchip.h) into your `scripts/HEADERS/` folder._
-2. _Copy [`gl___waterchip_test_runner.int`](https://github.com/mrowrpurr/Waterchip/raw/main/data/scripts/gl___waterchip_test_runner.int) into your `data/scripts/` folder._
-3. _Done!_
+- Download latest [`Waterchip.h`](https://raw.githubusercontent.com/mrowrpurr/Waterchip/main/scripts/headers/Waterchip.h)
 
 # Getting Started Guide
 

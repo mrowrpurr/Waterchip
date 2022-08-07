@@ -2,7 +2,7 @@
 
 ---
 
-<img src="https://github.com/mrowrpurr/Waterchip/blob/main/images/waterchip.gif?raw=true" align="left">
+<img src="https://github.com/mrowrpurr/Waterchip/blob/main/waterchip.gif?raw=true" align="left">
 
 # Waterchip 
 

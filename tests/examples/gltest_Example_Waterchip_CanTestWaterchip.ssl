@@ -1,0 +1,18 @@
+#include "Waterchip_v2.h"
+
+define_tests_proc(test_suite_one) begin
+    waterchip_enable_test_mode;
+
+    todo("this is a todo in suite one!");
+end
+
+define_tests_proc(test_suite_two) begin
+    waterchip_enable_test_mode;
+
+    todo("this is a todo in suite two!");
+end
+
+procedure start begin
+    run_tests_proc("Test Suite One", test_suite_one);
+    run_tests_proc("Test Suite Two", test_suite_two);
+end

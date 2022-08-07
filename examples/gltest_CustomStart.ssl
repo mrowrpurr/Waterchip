@@ -1,0 +1,21 @@
+#include "Waterchip_v2.h"
+
+define_tests_proc(some_tests) begin
+
+    debug_msg("Waterchip: BEFORE TESTS");
+
+    define_test("First test") begin
+        debug_msg("Waterchip: FIRST TEST");
+    end
+
+    define_test("Second test") begin
+        debug_msg("Waterchip: SECOND TEST");
+    end
+
+    debug_msg("Waterchip: AFTER TESTS");
+    
+end
+
+procedure start begin
+    run_tests_proc("Some Tests", some_tests);
+end

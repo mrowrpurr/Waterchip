@@ -1,0 +1,13 @@
+#include "Waterchip.h"
+
+/*
+    Verify that we can test Waterchip, itself.
+*/
+
+describe("Waterchip - Can test other Waterchip tests") begin
+
+    it("can get exported test suite details") begin
+
+    end
+
+end

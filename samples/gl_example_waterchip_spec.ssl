@@ -1,46 +1,65 @@
-#include "Waterchip.h"
+// #include "Waterchip.h"
+#include "Waterchip_v2.h"
 
-// Example code /////////////////////////////
-#include "define.h"
-#include "command.h"
-procedure clear_inventory(variable who) begin
-    while inven_count(who) > 0 do begin
-        variable ptr = inven_ptr(who, 0);
-        rm_obj_from_inven(who, ptr);
-    end
-end
-procedure give_weapon(variable who, variable pid) begin
-    add_obj_to_inven(who, create_object(pid, 0, 0));
-end
-///////////////////////////////////////////
+describe("Something") begin
+    it("1") begin end
+    it("2") begin end
+    it("3") begin end
+    it("4") begin end
+    it("5") begin end
+    it("6") begin end
+    it("7") begin end
+    it("8") begin end
+    it("9") begin end
+    it("10") begin end
+    it("11") begin end
+    it("12") begin end
+    it("13") begin end
+    it("14") begin end
+    it("15") begin end
+    it("16") begin end
+    it("17") begin end
+    it("18") begin end
+    it("19") begin end
+    it("20") begin end
+    it("21") begin end
+    it("22") begin end
+    it("23") begin end
+    it("24") begin end
+    it("25") begin end
+    it("26") begin end
+    it("27") begin end
+    it("28") begin end
+    it("29") begin end
+    it("30") begin end
+    it("31") begin end
+    it("32") begin end
+    it("33") begin end
+    it("34") begin end
+    it("35") begin end
+    it("36") begin end
+    it("37") begin end
+    it("38") begin end
+    it("39") begin end
+    it("40") begin end
+    it("41") begin end
 
-describe("Inventory Helper") begin
-
-    variable critter;
-
-    setup begin
-        critter = create_object(PID_PHIL, 0, 0);
-        call clear_inventory(critter);
-    end
-
-    test("inventory should be empty") begin
-        expect(inven_count(critter)) to_equal(0);
-        expect(inven_count(critter)) not_to_equal(69);
-    end
-
-    test("can add weapon to dude's inventory") begin
-        call give_weapon(critter, PID_SHOTGUN);
-        expect(inven_count(critter)) to_equal(1);
-    end
-
-    xtest("can equip weapon in dude's hands") begin
-        print("hello. I am in test");
-    end
-
-    todo("Pending test without a body");
-
-    teardown begin
-        print("something that runs after each test");
-    end
-    
+    // it("42") begin end
+    // it("43") begin end
+    // it("44") begin end
+    // it("45") begin end
+    // it("46") begin end
+    // it("47") begin end
+    // it("48") begin end
+    // it("49") begin end
+    // it("50") begin end
+    // it("51") begin end
+    // it("52") begin end
+    // it("53") begin end
+    // it("54") begin end
+    // it("55") begin end
+    // it("56") begin end
+    // it("57") begin end
+    // it("58") begin end
+    // it("59") begin end
 end

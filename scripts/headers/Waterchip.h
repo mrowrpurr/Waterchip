@@ -1,10 +1,11 @@
 #pragma once
 
+// TODO to_have_length to_be_greater_than ...
+
+// TODO update to_be_true and to_be_false to give messages specific to true/false (not 1/0)
+
 // TODO remote all sprintf for any expected/actual which could be a float (basically anything)
 //      because %s displays floats incorrectly!
-
-// TODO move alternative syntax aliases to Waterchip/Something.h
-//      to not pollute the namespace with lots of named defines!
 
 /*
     Library for Waterchip test/spec framework ~ by Mrowr Purr ~
@@ -250,6 +251,8 @@ variable __waterchip_testsuite_total_skipped;
 // Helper or asserting false (0) value
 #define to_be_false     to_equal(false)
 #define not_to_be_false not_to_equal(false)
+#define to_be_none      to_equal(0)
+#define not_to_be_none  not_to_equal(0)
 
 // TODO
 #define to_be_truthy fail("NOT YET IMPLEMENTED: to_be_truthy");
@@ -296,79 +299,6 @@ variable __waterchip_testsuite_total_skipped;
 // Expectation for whether a string contains a substring or array contains item 
 // typeof: 1 (int) 2 (float) 3 (string)
 #define to_contain fail("NOT YET IMPLEMENTED: to_contain");
-
-/****************************************
-   Primary macro for defining tests
-*****************************************/
-
-// Shared code between `test` and `todo`
-#define __waterchip_test_macro_start(test_name) \
-    if not __waterchip_testsuite_data then begin \
-        call __waterchip_load_config; \
-        __waterchip_testsuite_data = {}; \
-        fix_array(__waterchip_testsuite_data); \
-        __waterchip_testsuite_data.test_names = []; \
-        fix_array(__waterchip_testsuite_data.test_names); \
-        __waterchip_testsuite_data.test_results = {}; \
-        fix_array(__waterchip_testsuite_data.test_results); \
-    end \
-    if not __waterchip_config.enabled then return; \
-    if not __waterchip_should_run_testsuite(__waterchip__testsuite_name) then return; \
-    if (not __waterchip_testsuite_currently_running_tests) and scan_array(__waterchip_testsuite_data.test_names, test_name) > -1 and __waterchip__testsuite_times_run_tests_backup_test_var_to_verify_single_run == 0 then begin \
-        set_global_script_repeat(0); \
-        __waterchip__testsuite_times_run_tests_backup_test_var_to_verify_single_run++; \
-        __waterchip_testsuite_currently_running_tests = true; \
-        foreach __waterchip_testsuite_currently_running_test_name in (__waterchip_testsuite_data.test_names) begin \
-            if not __waterchip_should_run_test(__waterchip_testsuite_currently_running_test_name) then \
-                __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status = WATERCHIP_TEST_RESULT_SKIPPED; \
-            if __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status != WATERCHIP_TEST_RESULT_SKIPPED then begin \
-                call start; \
-                __waterchip_testsuite_first_test_run = false; \
-                if __waterchip_testsuite_teardown_defined then begin \
-                    __waterchip_testsuite_currently_running_teardown = true; \
-                    call start; \
-                    __waterchip_testsuite_currently_running_teardown = false; \
-                end \
-            end \
-            if __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status == WATERCHIP_TEST_RESULT_NOT_RUN then begin \
-                __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status = WATERCHIP_TEST_RESULT_PASSED; \
-                __waterchip_testsuite_total_passed++; \
-            end else if __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status == WATERCHIP_TEST_RESULT_SKIPPED then \
-                __waterchip_testsuite_total_skipped++; \
-            switch (__waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status) begin \
-                case WATERCHIP_TEST_RESULT_PASSED: if __waterchip_config.output.show_passed != "0" then \
-                    __waterchip_debug_test(__waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status); \
-                case WATERCHIP_TEST_RESULT_SKIPPED: if __waterchip_config.output.show_skipped != "0" then \
-                    __waterchip_debug_test(__waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status); \
-                case WATERCHIP_TEST_RESULT_FAILED: if __waterchip_config.output.show_failed != "0" then \
-                    __waterchip_debug_test(__waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status); \
-            end \
-            if __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status == WATERCHIP_TEST_RESULT_FAILED then begin \
-                __waterchip_testsuite_total_failed++; \
-                __waterchip_testsuite_currently_running_test_failure_message_lines = string_split(__waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].failure_message, "\n"); \
-                foreach __waterchip_testsuite_currently_running_test_failure_message_line in __waterchip_testsuite_currently_running_test_failure_message_lines \
-                    __waterchip_debug_test(__waterchip_testsuite_currently_running_test_failure_message_line); \
-            end \
-        end \
-        if __waterchip_testsuite_total_failed > 0 then \
-            __waterchip_debug_testsuite("[Tests failed] [" + __waterchip_testsuite_total_failed + " failed, " + __waterchip_testsuite_total_passed + " passed, " + __waterchip_testsuite_total_skipped + " skipped]"); \
-        else \
-            __waterchip_debug_testsuite("[Tests passed] [" + __waterchip_testsuite_total_passed + " passed, " + __waterchip_testsuite_total_skipped + " skipped]"); \
-        return; \
-    end \
-    if not __waterchip_testsuite_repeat_initialized then begin \
-        __waterchip_testsuite_repeat_initialized = true; \
-        set_global_script_repeat(1); \
-    end \
-    if scan_array(__waterchip_testsuite_data.test_names, test_name) == -1 then begin \
-        call array_push(__waterchip_testsuite_data.test_names, test_name); \
-        __waterchip_testsuite_data.test_results[test_name] = { "status": WATERCHIP_TEST_RESULT_NOT_RUN }; \
-        fix_array(__waterchip_testsuite_data.test_results[test_name]); \
-        if __waterchip_testsuite_currently_defining_skipped_test then begin \
-            __waterchip_testsuite_currently_defining_skipped_test = false; \
-            __waterchip_testsuite_data.test_results[test_name].status = WATERCHIP_TEST_RESULT_SKIPPED; \
-        end \
-    end
 
 /****************************************
      Configuration from Waterchip.ini
@@ -494,3 +424,91 @@ procedure __waterchip_should_run_test(variable test_name) begin
     end
     return true;
 end
+
+procedure __waterchip_test_init begin
+    if not __waterchip_testsuite_data then begin
+        call __waterchip_load_config;
+        __waterchip_testsuite_data = {};
+        fix_array(__waterchip_testsuite_data);
+        __waterchip_testsuite_data.test_names = [];
+        fix_array(__waterchip_testsuite_data.test_names);
+        __waterchip_testsuite_data.test_results = {};
+        fix_array(__waterchip_testsuite_data.test_results);
+    end
+end
+
+procedure __waterchip_test_exec begin
+    set_global_script_repeat(0);
+    __waterchip__testsuite_times_run_tests_backup_test_var_to_verify_single_run++;
+    __waterchip_testsuite_currently_running_tests = true;
+end
+
+procedure __waterchip_test_foreach begin
+    if not __waterchip_should_run_test(__waterchip_testsuite_currently_running_test_name) then
+        __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status = WATERCHIP_TEST_RESULT_SKIPPED;
+    if __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status != WATERCHIP_TEST_RESULT_SKIPPED then begin
+        call start;
+        __waterchip_testsuite_first_test_run = false;
+        if __waterchip_testsuite_teardown_defined then begin
+            __waterchip_testsuite_currently_running_teardown = true;
+            call start;
+            __waterchip_testsuite_currently_running_teardown = false;
+        end
+    end
+    if __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status == WATERCHIP_TEST_RESULT_NOT_RUN then begin
+        __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status = WATERCHIP_TEST_RESULT_PASSED;
+        __waterchip_testsuite_total_passed++;
+    end else if __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status == WATERCHIP_TEST_RESULT_SKIPPED then
+        __waterchip_testsuite_total_skipped++;
+end
+
+procedure __waterchip_define_test(variable test_name) begin
+    call array_push(__waterchip_testsuite_data.test_names, test_name);
+    __waterchip_testsuite_data.test_results[test_name] = { "status": WATERCHIP_TEST_RESULT_NOT_RUN };
+    fix_array(__waterchip_testsuite_data.test_results[test_name]);
+    if __waterchip_testsuite_currently_defining_skipped_test then begin
+        __waterchip_testsuite_currently_defining_skipped_test = false;
+        __waterchip_testsuite_data.test_results[test_name].status = WATERCHIP_TEST_RESULT_SKIPPED;
+    end
+end
+
+/****************************************
+   Primary macro for defining tests
+*****************************************/
+
+#define __waterchip_test_macro_start(test_name) \
+    call __waterchip_test_init; \
+    if not __waterchip_config.enabled then return; \
+    if not __waterchip_should_run_testsuite(__waterchip__testsuite_name) then return; \
+    if (not __waterchip_testsuite_currently_running_tests) and scan_array(__waterchip_testsuite_data.test_names, test_name) > -1 and __waterchip__testsuite_times_run_tests_backup_test_var_to_verify_single_run == 0 then begin \
+        call __waterchip_test_exec; \
+        foreach __waterchip_testsuite_currently_running_test_name in (__waterchip_testsuite_data.test_names) begin \
+            call __waterchip_test_foreach; \
+            switch (__waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status) begin \
+                case WATERCHIP_TEST_RESULT_PASSED: if __waterchip_config.output.show_passed != "0" then \
+                    __waterchip_debug_test(__waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status); \
+                case WATERCHIP_TEST_RESULT_SKIPPED: if __waterchip_config.output.show_skipped != "0" then \
+                    __waterchip_debug_test(__waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status); \
+                case WATERCHIP_TEST_RESULT_FAILED: if __waterchip_config.output.show_failed != "0" then \
+                    __waterchip_debug_test(__waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status); \
+            end \
+            if __waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].status == WATERCHIP_TEST_RESULT_FAILED then begin \
+                __waterchip_testsuite_total_failed++; \
+                __waterchip_testsuite_currently_running_test_failure_message_lines = string_split(__waterchip_testsuite_data.test_results[__waterchip_testsuite_currently_running_test_name].failure_message, "\n"); \
+                foreach __waterchip_testsuite_currently_running_test_failure_message_line in __waterchip_testsuite_currently_running_test_failure_message_lines \
+                    __waterchip_debug_test(__waterchip_testsuite_currently_running_test_failure_message_line); \
+            end \
+        end \
+        if __waterchip_testsuite_total_failed > 0 then \
+            __waterchip_debug_testsuite("[Tests failed] [" + __waterchip_testsuite_total_failed + " failed, " + __waterchip_testsuite_total_passed + " passed, " + __waterchip_testsuite_total_skipped + " skipped]"); \
+        else \
+            __waterchip_debug_testsuite("[Tests passed] [" + __waterchip_testsuite_total_passed + " passed, " + __waterchip_testsuite_total_skipped + " skipped]"); \
+        return; \
+    end \
+    if not __waterchip_testsuite_repeat_initialized then begin \
+        __waterchip_testsuite_repeat_initialized = true; \
+        set_global_script_repeat(1); \
+    end \
+    if scan_array(__waterchip_testsuite_data.test_names, test_name) == -1 then begin \
+        call __waterchip_define_test(test_name); \
+    end

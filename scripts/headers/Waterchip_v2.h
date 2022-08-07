@@ -14,6 +14,15 @@ variable __waterchip_data;
 // variable __watership_output_prefix = "[Waterchip] "
 
 /******************************************
+   Enumeration macro values
+******************************************/
+
+#define WATERCHIP_TEST_RESULT_FAILED  "FAIL"
+#define WATERCHIP_TEST_RESULT_PASSED  "PASS"
+#define WATERCHIP_TEST_RESULT_SKIPPED "SKIP"
+#define WATERCHIP_TEST_RESULT_NOT_RUN "NOT_RUN"
+
+/******************************************
    Procedure header declarations
 ******************************************/
 
@@ -95,8 +104,7 @@ variable __waterchip_data;
 //     if false then
 
 #define todo(test_name) \
-    debug_msg("Suite Info: " + __waterchip_test_suite_info); \
-    if not __waterchip_test_run_info then call __waterchip_declare_test(test_name, true)
+    if not __waterchip_test_run_info then call __waterchip_declare_test(__waterchip_test_suite_info, test_name, true)
 
 // #define setup_once
 
@@ -157,10 +165,15 @@ procedure __waterchip_initialize_test_suite(variable test_suite_name) begin
     variable test_suite = test_suites[test_suite_name];
 
     if not test_suite then begin
-        test_suite = {
-            "name": test_suite_name
-        };
+        // Test suite
+        test_suite = { "name": test_suite_name };
         fix_array(test_suite);
+
+        // Defined tests with their test results (when run)
+        variable test_suite_results = [];
+        fix_array(test_suite_results);
+        test_suite.tests = test_suite_results;
+
         test_suites[test_suite_name] = test_suite;
     end
 
@@ -175,16 +188,27 @@ procedure __waterchip_destroy_data begin
 
 end
 
-procedure __waterchip_declare_test(variable test_name, variable skip = false) begin
+procedure __waterchip_declare_test(variable test_suite, variable test_name, variable skip = false) begin
     debug_msg("Waterchip: DECLARE " + test_name);
 
-    // variable test_result = { "name": test_name };
-    // fix_array(test_result);
-    // variable test_count = len_array(__waterchip_data.test_results);
-    // resize_array(__waterchip_data.test_results, test_count + 1);
-    // __waterchip_data.test_results[test_count] = test_result;
+    // Setup representation of this test and its result
+    variable test_result = { "name": test_name };
+    fix_array(test_result);
 
-    // // test_result.expectations
+    if skip then
+        test_result.status = WATERCHIP_TEST_RESULT_SKIPPED;
+    else
+        test_result.status = WATERCHIP_TEST_RESULT_NOT_RUN;
+
+    // Add to the full list of tests for this test suite
+    variable test_count = len_array(test_suite.tests);
+    resize_array(test_suite.tests, test_count + 1);
+    test_suite.tests[test_count] = test_result;
+
+    // Setup an object for expectation info, e.g. failure message
+    variable expectations_info = {};
+    fix_array(expectations_info);
+    test_result.expectations = expectations_info;
 end
 
 /******************************************

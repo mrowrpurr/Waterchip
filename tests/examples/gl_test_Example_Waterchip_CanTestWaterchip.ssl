@@ -1,5 +1,7 @@
 #include "Waterchip_v2.h"
 
+export variable test_Example_Waterchip_CanTestWaterchip;
+
 define_tests_proc(test_suite_one) begin
     waterchip_enable_test_mode;
 
@@ -15,4 +17,7 @@ end
 procedure start begin
     run_tests_proc("Test Suite One", test_suite_one);
     run_tests_proc("Test Suite Two", test_suite_two);
+
+    debug_msg("Waterchip = START of the EXPORT one");
+    test_Example_Waterchip_CanTestWaterchip = __waterchip_data;
 end

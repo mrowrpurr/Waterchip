@@ -2,7 +2,11 @@
 #include "Waterchip_v2.h"
 
 describe("Something") begin
-    it("1") begin end
+
+    it("1") begin
+        test_output("ONE!");
+    end
+
     it("2") begin end
     it("3") begin end
     it("4") begin end

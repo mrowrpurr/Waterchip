@@ -297,6 +297,22 @@ variable __waterchip_testsuite_total_skipped;
 // typeof: 1 (int) 2 (float) 3 (string)
 #define to_contain fail("NOT YET IMPLEMENTED: to_contain");
 
+// Expectation for if a map has a key
+#define to_contain_key(expected) \
+    switch typeof(__waterchip_testsuite_current_expect_value) begin \
+        case 1: begin \
+            if __waterchip_testsuite_current_expect_value then begin \
+                if len_array(__waterchip_testsuite_current_expect_value) == -1 then \
+                    fail("to_contain_key called on int which is not an array"); \
+                if not map_contains_key(__waterchip_testsuite_current_expect_value, expected) then \
+                    fail("Expected map to contain key.\nExpected key: '" + expected + "'\nMap: " + debug_array_str(__waterchip_testsuite_current_expect_value)); \
+            end \
+        end \
+        case 2: fail("to_contain_key called with a float (invalid argument)"); \
+        case 3: fail("to_contain_key called with a string (invalid argument)"); \
+    end \
+    false
+
 /****************************************
    Primary macro for defining tests
 *****************************************/

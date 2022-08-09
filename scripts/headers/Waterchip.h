@@ -187,6 +187,8 @@ variable __waterchip_testsuite_total_skipped;
     __waterchip_test_macro_start(test_name) \
     false
 
+// In Waterchip v1, a context is just a prefix to add to ... no, it doesn't exist at all ;)
+
 /**************************
         EXPECTATIONS
 ***************************/
@@ -306,6 +308,23 @@ variable __waterchip_testsuite_total_skipped;
                     fail("to_contain_key called on int which is not an array"); \
                 if not map_contains_key(__waterchip_testsuite_current_expect_value, expected) then \
                     fail("Expected map to contain key.\nExpected key: '" + expected + "'\nMap: " + debug_array_str(__waterchip_testsuite_current_expect_value)); \
+            end \
+        end \
+        case 2: fail("to_contain_key called with a float (invalid argument)"); \
+        case 3: fail("to_contain_key called with a string (invalid argument)"); \
+    end \
+    false
+
+// Expectation of a certain length of array/map or string
+#define to_have_length(expected) \
+    switch typeof(__waterchip_testsuite_current_expect_value) begin \
+        case 1: begin \
+            if __waterchip_testsuite_current_expect_value then begin \
+                if len_array(__waterchip_testsuite_current_expect_value) == -1 then \
+                    fail("to_have_length called on int which is not an array"); \
+                if len_array(__waterchip_testsuite_current_expect_value) != expected then \
+                    fail("Expected map to have length.\nExpected length: " + expected + "\nActual length: " + \
+                    len_array(__waterchip_testsuite_current_expect_value)); \
             end \
         end \
         case 2: fail("to_contain_key called with a float (invalid argument)"); \

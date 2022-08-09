@@ -1,0 +1,20 @@
+#include "Waterchip_v2.h"
+
+export variable test_Example_Waterchip_DefineTests;
+
+define_tests_proc(test_suite_with_no_tests) begin
+    // No tests
+end
+
+define_tests_proc(has_one_todo_test) begin
+    todo("I am a todo!");
+end
+
+procedure start begin
+    waterchip_enable_test_mode;
+
+    run_tests_proc("Empty describe", test_suite_with_no_tests);
+    run_tests_proc("One TODO test", has_one_todo_test);
+
+    test_Example_Waterchip_DefineTests = __waterchip_data;
+end

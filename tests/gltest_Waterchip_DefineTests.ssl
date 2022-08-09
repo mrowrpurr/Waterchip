@@ -1,0 +1,48 @@
+#include "Waterchip/TestHelper.h"
+
+import_test_data(test_Example_Waterchip_DefineTests)
+
+#define get_test(test_suite, test_name) \
+    (first_equal_map_field_value(test_suite.tests, "name", test_name))
+
+procedure first_equal_map_field_value(variable array, variable key_name, variable desired_value) begin
+    variable element;
+    foreach element in array begin
+        if get_key_or_none(element, key_name) == desired_value then
+            return element;
+    end
+    return {};
+end
+
+describe("Defining Waterchip test suites using describe_proc") begin
+
+    variable test_data = test_Example_Waterchip_DefineTests;
+    variable test_suites = test_data.test_suites;
+    variable suite_empty = get_key_or_none(test_suites, "Empty describe");
+    variable suite_one_todo = get_key_or_none(test_suites, "One TODO test");
+    variable test;
+
+    it("can get test suite names") begin
+        expect(test_suites) to_contain_key("Empty describe");        
+        expect(test_suites) to_contain_key("One TODO test");        
+    end
+
+    it("can get test counts") begin
+        expect(suite_empty.tests) to_be_empty;
+        expect(suite_one_todo.tests) to_have_length(1);
+    end
+
+    it("can get test names") begin
+        expect(suite_one_todo.tests[0].name) to_equal("I am a todo!");
+    end
+
+    it("can get test results") begin
+        test = get_test(suite_one_todo, "I am a todo!");
+        expect(test.status) to_equal("SKIP");
+    end
+
+    todo("can get test error messages");
+    todo("can get test error expectation count");
+    todo("can get all printed output");
+
+end

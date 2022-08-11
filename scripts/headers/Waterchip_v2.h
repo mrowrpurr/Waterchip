@@ -65,7 +65,17 @@ variable __waterchip_data;
 #define run_tests_proc(test_suite_name, proc_name) \
     call proc_name(__waterchip_initialize_test_suite(test_suite_name), 0)
 
-#define define_test(test_name)
+#define define_skipped_test_no_body(test_name) \
+    if not __waterchip_test_run_info then call __waterchip_declare_test(__waterchip_test_suite_info, test_name, true)
+
+#define define_test(test_name) \
+    if not __waterchip_test_run_info then call __waterchip_declare_test(__waterchip_test_suite_info, test_name);
+
+#define define_skipped_test(test_name) \
+    if not __waterchip_test_run_info then call __waterchip_declare_test(__waterchip_test_suite_info, test_name, true);
+
+#define define_skipped_test_without_body(test_name) \
+    if not __waterchip_test_run_info then call __waterchip_declare_test(__waterchip_test_suite_info, test_name, true)
 
 // #define context "TODO"
 
@@ -103,8 +113,8 @@ variable __waterchip_data;
 //     if not __waterchip_test_run_info then call __waterchip_declare_test(test_name, true); \
 //     if false then
 
-#define todo(test_name) \
-    if not __waterchip_test_run_info then call __waterchip_declare_test(__waterchip_test_suite_info, test_name, true)
+// #define todo(test_name) \
+//     if not __waterchip_test_run_info then call __waterchip_declare_test(__waterchip_test_suite_info, test_name, true)
 
 // #define setup_once
 
@@ -189,8 +199,6 @@ procedure __waterchip_destroy_data begin
 end
 
 procedure __waterchip_declare_test(variable test_suite, variable test_name, variable skip = false) begin
-    debug_msg("Waterchip: DECLARE " + test_name);
-
     // Setup representation of this test and its result
     variable test_result = { "name": test_name };
     fix_array(test_result);

@@ -1,0 +1,37 @@
+#include "Waterchip_v2.h"
+
+export variable WaterchipTestExamples_UsingCoreMacros;
+
+// TODO prefix all defines here with waterchip_ ? <-------
+
+define_tests_proc(has_no_tests) begin
+    // No tests
+end
+
+define_tests_proc(has_two_todo_tests) begin
+    define_skipped_test_without_body("I am a todo without body!");
+    define_skipped_test("I am a todo!") begin
+        // This should not run!
+    end
+end
+
+define_tests_proc(passing_and_failing_test) begin
+    define_test("this should pass") begin
+        // nothing failing here!
+    end
+    define_test("this should fail") begin
+        // fail_test("Oh noes, I failed!");
+        // add a failure message without returning necessarily <--------
+        // and add a description of an expectation which triggered <---------
+    end
+end
+
+procedure start begin
+    waterchip_enable_test_mode;
+
+    run_tests_proc("Empty describe", has_no_tests);
+    run_tests_proc("Skipped tests", has_two_todo_tests);
+    run_tests_proc("One Pass, One Fail", passing_and_failing_test);
+
+    WaterchipTestExamples_UsingCoreMacros = __waterchip_data;
+end

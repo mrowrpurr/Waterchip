@@ -1,0 +1,59 @@
+// TODO - update to use describe/it and expectations, etc etc
+//        just using as a placeholder to get ASYNC test running
+
+#include "Waterchip_v2.h"
+
+#define print(text) debug_msg("Waterchip [print] " + text)
+
+define_tests_proc(just_some_tests) begin
+
+    define_test("test one") begin
+        print("hello from " + WATERCHIP_TEST.name);
+    end
+
+    define_test("test two") begin
+        print("hello from " + WATERCHIP_TEST.name);
+    end
+
+    // next, async!
+
+end
+
+procedure timed_event_p_proc begin
+    variable data = __waterchip_data;
+    data.test_run.currently_running_test_index++;
+    variable test_index = data.test_run.currently_running_test_index;
+    print("Running: " + test_index);
+
+    variable test_count = len_array(data.test_suites["Just Some Tests"].tests); // TODO make test_suites an array
+
+    if test_index < test_count then begin
+        print("Test exists...");
+        variable test = data.test_suites["Just Some Tests"].tests[test_index];
+        print("Test to run: " + test.name);
+        invoke_define_tests_proc("Just Some Tests", just_some_tests, test);
+        if test_index - test_count then add_global_timer_event(0, 0); // if there are any more ...
+    end
+end
+
+procedure test_runner_to_remove_and_put_into_framework begin
+    // TODO support multiple test suites
+
+    variable data = __waterchip_data;
+
+    variable test_run = { "currently_running_test_index": -1 };
+    fix_array(test_run);
+    data.test_run = test_run;
+
+    add_global_timer_event(0, 0);
+end
+
+procedure start begin
+
+    // Load the tests!
+    invoke_define_tests_proc("Just Some Tests", just_some_tests, false);
+
+    // Run the whole test suite! Begin the runner!
+    display_msg("THE TESTS: " + __waterchip_data);
+    call test_runner_to_remove_and_put_into_framework;
+end

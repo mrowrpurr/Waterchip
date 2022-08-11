@@ -44,28 +44,28 @@ end
 ******************************************/
 
 // #define describe(test_suite_name) \
-//     procedure __waterchip_tests(variable __waterchip_test_run_info)
+//     procedure __waterchip_tests(variable WATERCHIP_TEST)
 
 // #define it(test_name) \
-//     if not __waterchip_test_run_info then call __waterchip_declare_test(test_name); \
-//     else if __waterchip_test_run_info.run_test and __waterchip_test_run_info.current_test == test_name then
+//     if not WATERCHIP_TEST then call __waterchip_declare_test(test_name); \
+//     else if WATERCHIP_TEST.run_test and WATERCHIP_TEST.current_test == test_name then
 
 // #define xit(test_name) \
-//     if not __waterchip_test_run_info then call __waterchip_declare_test(test_name, true); \
+//     if not WATERCHIP_TEST then call __waterchip_declare_test(test_name, true); \
 //     if false then
 
 // #define todo(test_name) \
-//     if not __waterchip_test_run_info then call __waterchip_declare_test(__waterchip_test_suite_info, test_name, true)
+//     if not WATERCHIP_TEST then call __waterchip_declare_test(__waterchip_test_suite_info, test_name, true)
 
 // #define setup_once
 
 // #define setup \
-//     if not __waterchip_test_run_info then __waterchip_data.has_setup = true; \
-//     else if __waterchip_test_run_info.run_setup then
+//     if not WATERCHIP_TEST then __waterchip_data.has_setup = true; \
+//     else if WATERCHIP_TEST.run_setup then
 
 // #define teardown \
-//     if not __waterchip_test_run_info then __waterchip_data.has_teardown = true; \
-//     else if __waterchip_test_run_info.run_teardown then
+//     if not WATERCHIP_TEST then __waterchip_data.has_teardown = true; \
+//     else if WATERCHIP_TEST.run_teardown then
 
 /******************************************
     Output helpers to print to debug_msg

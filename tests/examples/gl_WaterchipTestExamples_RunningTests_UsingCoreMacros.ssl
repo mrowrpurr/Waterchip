@@ -1,0 +1,46 @@
+#include "Waterchip_v2.h"
+
+export variable WaterchipTestExamples_RunningTests_UsingCoreMacros_OutputData;
+export variable WaterchipTestExamples_RunningTests_UsingCoreMacros;
+
+variable output_data;
+
+define_tests_proc(some_tests) begin
+
+    define_skipped_test("a skipped test") begin
+        output_data.ran_skipped_test = "ran the skipped test";
+    end
+
+    define_test("a test not being run") begin
+        output_data.ran_the_wrong_test = "ran the WRONG test";
+    end
+
+    // should not be skipped
+    define_test("the test being run") begin
+        output_data.ran_the_right_test = "ran the RIGHT test";
+    end
+
+    // async
+    // ...
+
+end
+
+procedure start begin
+    // Setup data which can be read from these tests' tests for verification
+    output_data = {};
+    fix_array(output_data);
+    WaterchipTestExamples_RunningTests_UsingCoreMacros_OutputData = output_data;
+
+    // Load all tests
+    invoke_define_tests_proc("Some tests", some_tests, false);
+
+    // Run one test!
+    invoke_define_tests_proc("Some tests", some_tests, {
+        "name": "the test being run"
+    });
+
+    // Run async test
+    // ?
+
+    WaterchipTestExamples_RunningTests_UsingCoreMacros = __waterchip_data;
+end

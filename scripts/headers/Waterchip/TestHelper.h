@@ -11,3 +11,15 @@
 
 #define import_test_data(variable_name) \
     import variable variable_name;
+
+#define get_test(test_suite, test_name) \
+    (first_equal_map_field_value(test_suite.tests, "name", test_name))
+
+procedure first_equal_map_field_value(variable array, variable key_name, variable desired_value) begin
+    variable element;
+    foreach element in array begin
+        if get_key_or_none(element, key_name) == desired_value then
+            return element;
+    end
+    return {};
+end

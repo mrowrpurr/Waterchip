@@ -1,8 +1,9 @@
 #include "Waterchip_v2.h"
 
 export variable WaterchipTestExamples_UsingCoreMacros;
+export variable WaterchipTestExamples_UsingCoreMacros_OutputData;
 
-// TODO prefix all defines here with waterchip_ ? <-------
+variable output_data;
 
 define_tests_proc(has_no_tests) begin
     // No tests
@@ -15,23 +16,24 @@ define_tests_proc(has_two_todo_tests) begin
     end
 end
 
-define_tests_proc(passing_and_failing_test) begin
-    define_test("this should pass") begin
-        // nothing failing here!
+define_tests_proc(normal_tests) begin
+    define_test("this is a test") begin
+        output_data.ran_test = true; // verify that this does not run!
     end
-    define_test("this should fail") begin
-        // fail_test("Oh noes, I failed!");
-        // add a failure message without returning necessarily <--------
-        // and add a description of an expectation which triggered <---------
+    define_test("this is another test") begin
+        output_data.ran_another_test = true; // verify that this does not run!
     end
 end
 
 procedure start begin
-    // waterchip_enable_test_mode;
+    // Setup data which can be read from these tests' tests for verification
+    output_data = {};
+    fix_array(output_data);
+    WaterchipTestExamples_UsingCoreMacros_OutputData = output_data;
 
-    run_tests_proc("Empty describe", has_no_tests);
-    run_tests_proc("Skipped tests", has_two_todo_tests);
-    run_tests_proc("One Pass, One Fail", passing_and_failing_test);
+    invoke_define_tests_proc("Empty describe", has_no_tests, false);
+    invoke_define_tests_proc("Skipped tests", has_two_todo_tests, false);
+    invoke_define_tests_proc("Normal tests", normal_tests, false);
 
     WaterchipTestExamples_UsingCoreMacros = __waterchip_data;
 end

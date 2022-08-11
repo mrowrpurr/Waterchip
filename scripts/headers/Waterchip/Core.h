@@ -20,18 +20,19 @@ variable __waterchip_data;
 #define define_tests_proc(proc_name) \
     procedure proc_name(variable __waterchip_test_suite_info, variable __waterchip_test_run_info)
 
-// TODO rename to like run_test_definition_proc or something
-#define run_tests_proc(test_suite_name, proc_name) \
-    call proc_name(__waterchip_initialize_test_suite(test_suite_name), 0)
+#define invoke_define_tests_proc(test_suite_name, proc_name, test_run_info) \
+    call proc_name(__waterchip_initialize_test_suite(test_suite_name), test_run_info)
 
 #define define_skipped_test_no_body(test_name) \
     if not __waterchip_test_run_info then call __waterchip_declare_test(__waterchip_test_suite_info, test_name, true)
 
 #define define_test(test_name) \
-    if not __waterchip_test_run_info then call __waterchip_declare_test(__waterchip_test_suite_info, test_name);
+    if not __waterchip_test_run_info then call __waterchip_declare_test(__waterchip_test_suite_info, test_name); \
+    else if __waterchip_test_run_info.name == test_name then
 
 #define define_skipped_test(test_name) \
-    if not __waterchip_test_run_info then call __waterchip_declare_test(__waterchip_test_suite_info, test_name, true);
+    if not __waterchip_test_run_info then call __waterchip_declare_test(__waterchip_test_suite_info, test_name, true); \
+    else if false then
 
 #define define_skipped_test_without_body(test_name) \
     if not __waterchip_test_run_info then call __waterchip_declare_test(__waterchip_test_suite_info, test_name, true)

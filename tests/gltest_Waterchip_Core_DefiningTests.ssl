@@ -1,60 +1,58 @@
 #include "Waterchip/TestHelper.h"
 
 import_test_data(WaterchipTestExamples_UsingCoreMacros)
+import_test_data(WaterchipTestExamples_UsingCoreMacros_OutputData)
 
-#define get_test(test_suite, test_name) \
-    (first_equal_map_field_value(test_suite.tests, "name", test_name))
+describe("Defining Waterchip test suites using define_tests_proc") begin
 
-procedure first_equal_map_field_value(variable array, variable key_name, variable desired_value) begin
-    variable element;
-    foreach element in array begin
-        if get_key_or_none(element, key_name) == desired_value then
-            return element;
-    end
-    return {};
-end
-
-describe("Defining Waterchip test suites using describe_proc") begin
+    variable test_output_data = WaterchipTestExamples_UsingCoreMacros_OutputData;
 
     variable test_data = WaterchipTestExamples_UsingCoreMacros;
     variable test_suites = test_data.test_suites;
     variable suite_empty = get_key_or_none(test_suites, "Empty describe");
     variable suite_skipped_tests = get_key_or_none(test_suites, "Skipped tests");
-    variable suite_one_pass_one_fail = get_key_or_none(test_suites, "One Pass, One Fail");
+    variable suite_normal_tests = get_key_or_none(test_suites, "Normal tests");
+
     variable test;
 
     it("can get test suite names") begin
         expect(test_suites) to_contain_key("Empty describe");        
         expect(test_suites) to_contain_key("Skipped tests");
-        expect(test_suites) to_contain_key("One Pass, One Fail");
+        expect(test_suites) to_contain_key("Normal tests");
     end
 
     it("can get test counts") begin
         expect(suite_empty.tests) to_be_empty;
         expect(suite_skipped_tests.tests) to_have_length(2);
-        expect(suite_one_pass_one_fail.tests) to_have_length(2);
+        expect(suite_normal_tests.tests) to_have_length(2);
     end
 
     it("can get test names") begin
         expect(suite_skipped_tests.tests[0].name) to_equal("I am a todo without body!");
         expect(suite_skipped_tests.tests[1].name) to_equal("I am a todo!");
-        expect(suite_one_pass_one_fail.tests[0].name) to_equal("this should pass");
-        expect(suite_one_pass_one_fail.tests[1].name) to_equal("this should fail");
+        expect(suite_normal_tests.tests[0].name) to_equal("this is a test");
+        expect(suite_normal_tests.tests[1].name) to_equal("this is another test");
     end
 
-    it("can get test results") begin
+    it("does not run any of the tests (defining tests only!)") begin
+        expect(test_output_data.ran_test) to_be_false; // TODO change to be: not_to_contain_key
+        expect(test_output_data.ran_another_test) to_be_false;
+    end
+
+    xit("can get default test results (should be SKIP or NOTRUN)") begin
         test = get_test(suite_skipped_tests, "I am a todo!");
         expect(test.status) to_equal("SKIP");
 
-        // test = get_test(suite_one_pass_one_fail, "this should pass");
+        // test = get_test(suite_normal_tests, "this should pass");
         // expect(test.status) to_equal("PASS");
 
-        // test = get_test(suite_one_pass_one_fail, "this should fail");
+        // test = get_test(suite_normal_tests, "this should fail");
         // expect(test.status) to_equal("FAIL");
     end
 
-    todo("can get test error messages");
-    todo("can get test error expectation count");
-    todo("can get all printed output");
+    // these should be in the running tests test:
+    // todo("can get test error messages");
+    // todo("can get test error expectation count");
+    // todo("can get all printed output");
 
 end

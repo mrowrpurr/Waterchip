@@ -5,4 +5,6 @@
     equivalent of #include "Waterchip.h" (which bundles headers into one file).
 */
 
+#include "sfall/sfall.h"
+
 #include "Waterchip/Core.h"

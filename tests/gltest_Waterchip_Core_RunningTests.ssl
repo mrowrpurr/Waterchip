@@ -9,6 +9,9 @@ describe("Running a basic Waterchip test") begin
     variable test_output_data = WaterchipTestExamples_RunningTests_UsingCoreMacros_OutputData;
     variable test_suites = test_data.test_suites;
 
+    // Example:
+    // async it("runs the expected test but no others") begin
+        
     it("runs the expected test but no others") begin
         expect(test_output_data.ran_the_wrong_test) to_be_false;
         expect(test_output_data.ran_the_right_test) to_equal("ran the RIGHT test");

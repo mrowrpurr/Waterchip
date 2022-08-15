@@ -21,10 +21,14 @@ variable __waterchip_data;
     procedure proc_name(variable __waterchip_test_suite_info, variable WATERCHIP_TEST)
 
 #define invoke_define_tests_proc(test_suite_name, proc_name, test_run_info) \
-    call proc_name(__waterchip_initialize_test_suite(test_suite_name), test_run_info)
-
-#define define_skipped_test_no_body(test_name) \
-    if not WATERCHIP_TEST then call __waterchip_declare_test(__waterchip_test_suite_info, test_name, true)
+    begin \
+        debug_msg("Waterchip: invoke_define_tests_proc test result: " + test_run_info); \
+        if test_run_info and get_array(test_run_info, "__async_info") then begin \
+            set_array(get_array(test_run_info, "__async_info"), "current_step", 0); \
+        end \
+        call proc_name(__waterchip_initialize_test_suite(test_suite_name), test_run_info); \
+    end \
+    false
 
 #define define_test(test_name) \
     if not WATERCHIP_TEST then call __waterchip_declare_test(__waterchip_test_suite_info, test_name); \
@@ -36,6 +40,23 @@ variable __waterchip_data;
 
 #define define_skipped_test_without_body(test_name) \
     if not WATERCHIP_TEST then call __waterchip_declare_test(__waterchip_test_suite_info, test_name, true)
+
+#define define_async_test(test_name) \
+    if not WATERCHIP_TEST then call __waterchip_declare_test(__waterchip_test_suite_info, test_name, false, true); \
+    else if WATERCHIP_TEST.name == test_name then
+
+#define define_async_test_step \
+    if __waterchip_should_run_async_step(WATERCHIP_TEST.__async_info) then
+
+#define define_async_test_wait_step(condition) \
+    if __waterchip_should_run_async_wait_step(WATERCHIP_TEST.__async_info) then begin \
+        if (condition) then begin \
+            print("COMPLETED!!!!!!!!!! setting steps_completed to current step: " + WATERCHIP_TEST.__async_info.current_step); \
+            WATERCHIP_TEST.__async_info.steps_completed = WATERCHIP_TEST.__async_info.current_step; \
+        end else \
+            return; \
+    end \
+    false
 
 procedure __waterchip_initialize_data begin
     if __waterchip_data then return;
@@ -86,15 +107,24 @@ procedure __waterchip_destroy_data begin
 
 end
 
-procedure __waterchip_declare_test(variable test_suite, variable test_name, variable skip = false) begin
+procedure __waterchip_declare_test(variable test_suite, variable test_name, variable skip = false, variable async = false) begin
     // Setup representation of this test and its result
-    variable test_result = { "name": test_name };
+    variable test_result = { "name": test_name, "async": async };
     fix_array(test_result);
 
     if skip then
         test_result.status = WATERCHIP_TEST_RESULT_SKIPPED;
     else
         test_result.status = WATERCHIP_TEST_RESULT_NOT_RUN;
+
+    if async then begin
+        variable async_info = {
+            "current_step": 0,
+            "steps_completed": 0
+        };
+        fix_array(async_info);
+        test_result.__async_info = async_info;
+    end
 
     // Add to the full list of tests for this test suite
     variable test_count = len_array(test_suite.tests);
@@ -105,4 +135,42 @@ procedure __waterchip_declare_test(variable test_suite, variable test_name, vari
     variable expectations_info = {};
     fix_array(expectations_info);
     test_result.expectations = expectations_info;
+end
+
+// step_highest_reached
+// step_current
+
+procedure __waterchip_should_run_async_step(variable async_info) begin
+    variable current_step = async_info.current_step;
+    current_step++;
+    async_info.current_step = current_step;
+
+    variable steps_completed = async_info.steps_completed;
+
+    if steps_completed < current_step then begin
+        debug_msg("Waterchip: RUN STEP " + current_step + " completed:" + steps_completed);
+        async_info.steps_completed = current_step;
+        return true;
+    end
+
+    debug_msg("Waterchip: *skip* STEP " + current_step);
+    return false;
+end
+
+procedure __waterchip_should_run_async_wait_step(variable async_info) begin
+    variable current_step = async_info.current_step;
+    current_step++;
+    async_info.current_step = current_step;
+
+    variable steps_completed = async_info.steps_completed;
+
+    debug_msg("Waterchip: should run wait??? current_step:" + current_step + " max_step:" + steps_completed + " complete?:" + async_info.complete);
+
+    if steps_completed < current_step then begin
+        debug_msg("Waterchip: RUN {wait} STEP " + current_step + " completed:" + steps_completed);
+        return true;
+    end
+
+    debug_msg("Waterchip: *skip* {wait} STEP " + current_step);
+    return false;
 end

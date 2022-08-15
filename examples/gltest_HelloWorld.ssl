@@ -3,37 +3,88 @@
 
 #include "Waterchip_v2.h"
 
+#include "sfall/lib.arrays.h"
+
 #define print(text) debug_msg("Waterchip [print] " + text)
+
+variable signal_ran = false;
+variable signal_ran2 = false;
+
+procedure run_via_signal begin
+    print("SIGNAL RUN!!!!!!!!!!!!!!!!!!!!");
+    signal_ran = 69;
+end
+
+procedure run_via_signal2 begin
+    print("SIGNAL 2222 RUN!!!!!!!!!!!!!!!!!!!!");
+    signal_ran2 = 69;
+end
 
 define_tests_proc(just_some_tests) begin
 
-    define_test("test one") begin
-        print("hello from " + WATERCHIP_TEST.name);
+    define_async_test("an async test") begin
+        define_async_test_step begin
+            print("Hi from FIRST step of async test, signal_ran: " + signal_ran);
+            SignalNamed("RunThisSignalInTest");
+            print("We will now WAIT until the signal is run, signal_ran: " + signal_ran);
+        end
+        define_async_test_wait_step(signal_ran); // ... add ability to wait() with a number of ticks that it'll wait...
+        define_async_test_step begin
+            print("Step AFTER the waiting!!! signal was run???? " + signal_ran);
+        end
     end
 
-    define_test("test two") begin
-        print("hello from " + WATERCHIP_TEST.name);
+    define_async_test("2222 a DIFFERENT async test") begin
+        define_async_test_step begin
+            print("2222 Hi from FIRST step of async test, signal_ran: " + signal_ran);
+            SignalNamed("RunThisSignalInTest2");
+            print("22222 We will now WAIT until the signal is run, signal_ran: " + signal_ran);
+        end
+        define_async_test_wait_step(signal_ran2); // ... add ability to wait() with a number of ticks that it'll wait...
+        define_async_test_step begin
+            print("2222 Step AFTER the waiting!!! signal was run???? " + signal_ran);
+        end
     end
-
-    // next, async!
 
 end
 
+variable timed_runs = 0;
+
 procedure timed_event_p_proc begin
+    timed_runs++;
+    if timed_runs > 20 then begin
+        print("MAX ITERATIONS - STOPPING!");
+        return;
+    end
+
     variable data = __waterchip_data;
-    data.test_run.currently_running_test_index++;
+    variable currently_running_test_index = data.test_run.currently_running_test_index;
+
+    if currently_running_test_index > -1 then begin
+        variable t = data.test_suites["Just Some Tests"].tests[currently_running_test_index];
+        print(debug_array_str(t.__async_info));
+        if not t.async or t.__async_info.current_step == t.__async_info.steps_completed then
+            data.test_run.currently_running_test_index++;
+    end else
+        data.test_run.currently_running_test_index++;
+
     variable test_index = data.test_run.currently_running_test_index;
     print("Running: " + test_index);
 
     variable test_count = len_array(data.test_suites["Just Some Tests"].tests); // TODO make test_suites an array
 
     if test_index < test_count then begin
+        print("=====================================================================");
         print("Test exists...");
         variable test = data.test_suites["Just Some Tests"].tests[test_index];
         print("Test to run: " + test.name);
         invoke_define_tests_proc("Just Some Tests", just_some_tests, test);
-        if test_index - test_count then add_global_timer_event(0, 0); // if there are any more ...
-    end
+
+        print("TEST INDEX:" + test_index + " TEST_COUNT:" + test_count);
+
+        add_global_timer_event(1, 0); // if there are any more ...
+    end else
+        print("DONE!");
 end
 
 procedure test_runner_to_remove_and_put_into_framework begin
@@ -49,6 +100,8 @@ procedure test_runner_to_remove_and_put_into_framework begin
 end
 
 procedure start begin
+    AddNamedHandler("RunThisSignalInTest", run_via_signal);
+    AddNamedHandler("RunThisSignalInTest2", run_via_signal2);
 
     // Load the tests!
     invoke_define_tests_proc("Just Some Tests", just_some_tests, false);
